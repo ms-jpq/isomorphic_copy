@@ -41,9 +41,8 @@ def csshd() -> str:
     return canonical
 
 
-def supervise(args: List[str]) -> None:
+def local_daemon(args: List[str]) -> None:
   prog = csshd()
-  print(prog)
   process = Popen(
       ["ssh", *args, f"{prog}"],
       stdout=PIPE,
@@ -98,7 +97,7 @@ def cp() -> None:
 
   if name == "cssh":
     while True:
-      supervise(argv[2:])
+      local_daemon(argv[1:])
       sleep(1)
   if name == "csshd":
     remote_daemon(socket_path)
