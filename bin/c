@@ -1,4 +1,4 @@
-#!/usr/bin/env python3-find-exec
+#!/usr/bin/env python3
 
 from os import environ, getcwd, unlink
 from os.path import basename, dirname, join, relpath
@@ -113,7 +113,7 @@ def cssh_cmd() -> List[str]:
 def cssh_run(args: List[str]) -> None:
   cmd = cssh_cmd()
   prog = cssh_prog()
-  exe = [*cmd, *args, prog]
+  exe = [*cmd, *args, "sh", "-c", f"'{prog}'"]
   process: Popen = Popen(exe,
                          stdout=PIPE,
                          stderr=PIPE)
