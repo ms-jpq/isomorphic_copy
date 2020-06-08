@@ -52,11 +52,15 @@ def rcp(data: bytes) -> None:
     sock.sendall(b'\0\n')
 
 
-def copy() -> None:
-  data: bytes = stdin.read().strip("\n").encode()
+def cp_data(data: bytes) -> None:
   cp(data)
   if environ.get("SSH_TTY"):
     rcp(data)
+
+
+def copy() -> None:
+  data: bytes = stdin.read().strip("\n").encode()
+  cp_data(data)
 
 
 #################### ############ ####################
@@ -98,6 +102,7 @@ def cssh_run(args: List[str]) -> None:
       stderr=PIPE)
 
   buf = bytearray()
+
   while True:
     code = process.poll()
     if code:
@@ -108,7 +113,7 @@ def cssh_run(args: List[str]) -> None:
     line: bytes = process.stdout.readline()
     for b in line:
       if b == 0:
-        copy(buf)
+        cp_data(buf)
         buf.clear()
         break
       else:
