@@ -124,6 +124,7 @@ def cssh() -> None:
   while True:
     cssh_run(argv[1:])
     sleep(1)
+    print("\a")
 
 
 #################### ############ ####################
