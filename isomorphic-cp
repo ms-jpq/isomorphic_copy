@@ -15,7 +15,7 @@ from typing import List
 #################### INIT Region ####################
 #################### ########### ####################
 
-__dir__ = dirname(__file__)
+__bin__ = join(dirname(__file__), "bin")
 __name__ = argv[1]
 __args__ = argv[2:]
 
@@ -23,7 +23,7 @@ __args__ = argv[2:]
 def path_mask() -> None:
   paths = (path
            for path in environ["PATH"].split(":")
-           if path != __dir__)
+           if path != __bin__)
   environ["PATH"] = ":".join(paths)
 
 
@@ -95,7 +95,7 @@ def paste() -> None:
 
 def cssh_prog() -> str:
   home = environ["HOME"]
-  canonical = join(__dir__, "csshd")
+  canonical = join(__bin__, "csshd")
 
   if canonical.startswith(home):
     prog = relpath(canonical, home)
