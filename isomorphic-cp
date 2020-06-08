@@ -16,6 +16,8 @@ from typing import List
 #################### ########### ####################
 
 __dir__ = dirname(__file__)
+__name__ = argv[1]
+__args__ = argv[2:]
 
 
 def path_mask() -> None:
@@ -106,8 +108,7 @@ def cssh_cmd() -> List[str]:
   lookup = {"cssh": ["ssh"],
             "cdocker": ["docker", "exec", "-it"],
             "ckube": ["kubectl", "exec", "-it"]}
-  name = basename(argv[0])
-  return lookup[name]
+  return lookup[__name__]
 
 
 def cssh_run(args: List[str]) -> None:
@@ -138,7 +139,7 @@ def cssh_run(args: List[str]) -> None:
 
 def cssh() -> None:
   while True:
-    cssh_run(argv[1:])
+    cssh_run(__args__)
     sleep(1)
     print("\a")
 
@@ -173,19 +174,19 @@ def csshd() -> None:
 #################### ########### ####################
 
 
-def is_copy(name: str, args: List[str]) -> bool:
-  if name in {"c", "pbcopy", "wl-copy"}:
+def is_copy() -> bool:
+  if __name__ in {"c", "pbcopy", "wl-copy"}:
     return True
-  elif name == "xclip" and set(args).isdisjoint({"-o", "-out"}):
+  elif __name__ == "xclip" and set(__args__).isdisjoint({"-o", "-out"}):
     return True
   else:
     return False
 
 
-def is_paste(name: str, args: List[str]) -> bool:
-  if name in {"p", "pbpaste", "wl-paste"}:
+def is_paste() -> bool:
+  if __name__ in {"p", "pbpaste", "wl-paste"}:
     return True
-  elif name == "xclip" and not set(args).isdisjoint({"-o", "-out"}):
+  elif __name__ == "xclip" and not set(__args__).isdisjoint({"-o", "-out"}):
     return True
   else:
     return False
@@ -193,18 +194,17 @@ def is_paste(name: str, args: List[str]) -> bool:
 
 def main() -> None:
   path_mask()
-  name = basename(argv[0])
 
-  if name in {"cssh", "cdocker", "ckube"}:
+  if __name__ in {"cssh", "cdocker", "ckube"}:
     cssh()
-  elif name == "csshd":
+  elif __name__ == "csshd":
     csshd()
-  elif is_paste(name, argv[1:]):
+  elif is_paste():
     paste()
-  elif is_copy(name, argv[1:]):
+  elif is_copy():
     copy()
   else:
-    print(f"Unknown -- {name} {' '.join(argv[1:])}", file=stderr)
+    print(f"Unknown -- {__name__} {' '.join(__args__)}", file=stderr)
     exit(1)
 
 
