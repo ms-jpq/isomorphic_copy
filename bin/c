@@ -30,6 +30,7 @@ def clippy(data: str) -> None:
     run(["pbcopy"], input=data.encode())
   else:
     print("⚠️ No clipboard integration ⚠️", file=stderr)
+    exit(1)
 
 
 def clean_socket(path: str) -> None:
