@@ -16,10 +16,9 @@ __dir__ = dirname(realpath(__file__))
 
 
 def fake_path() -> None:
-  shim_path = __dir__
   paths = (path
            for path in environ["PATH"].split(":")
-           if path != shim_path)
+           if path != __dir__)
   environ["PATH"] = ":".join(paths)
 
 
