@@ -102,10 +102,19 @@ def cssh_prog() -> str:
     return canonical
 
 
+def cssh_cmd() -> List[str]:
+  lookup = {"cssh": ["ssh"],
+            "cdocker": ["docker", "exec", "-t"],
+            "ckube": ["kubectl", "exec", "-i", "-t"]}
+  name = basename(argv[0])
+  return lookup[name]
+
+
 def cssh_run(args: List[str]) -> None:
   prog = cssh_prog()
+  cmd = cssh_cmd()
   process: Popen = Popen(
-      ["ssh", *args, prog],
+      [*cmd, *args, prog],
       stdout=PIPE,
       stderr=PIPE)
 
@@ -187,7 +196,7 @@ def main() -> None:
   path_mask()
   name = basename(argv[0])
 
-  if name == "cssh":
+  if name in {"cssh", "cdocker", "ckube"}:
     cssh()
   elif name == "csshd":
     csshd()
