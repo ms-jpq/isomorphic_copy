@@ -15,10 +15,12 @@ from typing import List
 #################### INIT Region ####################
 #################### ########### ####################
 
+
+__dir__ = dirname(__file__)
 __bin__ = join(dirname(__file__), "bin")
 __name__ = basename(argv[1])
 __args__ = argv[2:]
-__socket_path__ = join("/", "tmp", "iso_cp", "cp_socket")
+__socket_path__ = join(__dir__, "socket", "cp.socket")
 
 
 def path_mask() -> None:
@@ -87,6 +89,12 @@ def paste() -> None:
 #################### ########### ####################
 
 
+def cssh_cmd() -> List[str]:
+  lookup = {"cssh": ["ssh"],
+            "cdocker": ["docker", "exec"]}
+  return lookup[__name__]
+
+
 def cssh_prog() -> str:
   home = environ["HOME"]
   canonical = join(__bin__, "csshd")
@@ -99,8 +107,9 @@ def cssh_prog() -> str:
 
 
 def cssh_run(args: List[str]) -> None:
+  cmd = cssh_cmd()
   prog = cssh_prog()
-  exe = ["ssh", *args, prog]
+  exe = [*cmd, *args, "bash", "-c", f"'{prog}'"]
   process: Popen = Popen(exe,
                          stdout=PIPE,
                          stderr=PIPE)
@@ -134,10 +143,8 @@ def cssh() -> None:
 #################### CSSHD Region ####################
 #################### ############ ####################
 
+
 def ready_socket(path: str) -> None:
-  home = dirname(path)
-  makedirs(home, exist_ok=True)
-  chmod(home, 600)
   try:
     unlink(path)
   except IOError:
@@ -183,7 +190,7 @@ def is_paste() -> bool:
 def main() -> None:
   path_mask()
 
-  if __name__ == "cssh":
+  if __name__ in {"cssh", "cdocker"}:
     cssh()
   elif __name__ == "csshd":
     csshd()
