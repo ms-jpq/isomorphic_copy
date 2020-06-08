@@ -63,14 +63,6 @@ def copy() -> None:
   cp_data(data)
 
 
-def is_copy(name: str, args: List[str]) -> bool:
-  if name in {"c", "pbcopy"}:
-    return True
-  elif name == "xclip" and "-o" not in args:
-    return True
-  else:
-    return False
-
 #################### ############ ####################
 #################### Paste Region ####################
 #################### ############ ####################
@@ -84,15 +76,6 @@ def paste() -> None:
   else:
     print("⚠️ No clipboard integration ⚠️", file=stderr)
     exit(1)
-
-
-def is_paste(name: str, args: List[str]) -> bool:
-  if name in {"p", "pbpaste"}:
-    return True
-  elif name == "xclip" and "-o" in args:
-    return True
-  else:
-    return False
 
 
 #################### ########### ####################
@@ -172,6 +155,24 @@ def csshd() -> None:
 #################### ########### ####################
 #################### Main Region ####################
 #################### ########### ####################
+
+
+def is_copy(name: str, args: List[str]) -> bool:
+  if name in {"c", "pbcopy"}:
+    return True
+  elif name == "xclip" and set(args).isdisjoint({"-o", "-out"}):
+    return True
+  else:
+    return False
+
+
+def is_paste(name: str, args: List[str]) -> bool:
+  if name in {"p", "pbpaste"}:
+    return True
+  elif name == "xclip" and not set(args).isdisjoint({"-o", "-out"}):
+    return True
+  else:
+    return False
 
 
 def main() -> None:
