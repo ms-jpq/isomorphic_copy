@@ -158,7 +158,7 @@ def csshd() -> None:
 
 
 def is_copy(name: str, args: List[str]) -> bool:
-  if name in {"c", "pbcopy"}:
+  if name in {"c", "pbcopy", "wl-copy"}:
     return True
   elif name == "xclip" and set(args).isdisjoint({"-o", "-out"}):
     return True
@@ -167,7 +167,7 @@ def is_copy(name: str, args: List[str]) -> bool:
 
 
 def is_paste(name: str, args: List[str]) -> bool:
-  if name in {"p", "pbpaste"}:
+  if name in {"p", "pbpaste", "wl-paste"}:
     return True
   elif name == "xclip" and not set(args).isdisjoint({"-o", "-out"}):
     return True
@@ -196,3 +196,4 @@ try:
   main()
 except KeyboardInterrupt:
   pass
+
