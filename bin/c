@@ -8,31 +8,56 @@ from socketserver import BaseRequestHandler, UnixStreamServer
 from subprocess import PIPE, Popen, run
 from sys import argv, stderr, stdin, stdout
 from time import sleep
-from typing import Iterable, List
+from typing import List
+
+
+#################### ########### ####################
+#################### INIT Region ####################
+#################### ########### ####################
 
 __dir__ = dirname(realpath(__file__))
-__socket_path__ = ""
 
 
 def path_mask() -> None:
-  paths: Iterable[str] = (path
-                          for path in environ["PATH"].split(":")
-                          if path != __dir__)
+  paths = (path
+           for path in environ["PATH"].split(":")
+           if path != __dir__)
   environ["PATH"] = ":".join(paths)
 
 
-def tmux_cp(data: bytes) -> None:
+def socket_path() -> str:
+  runtime_dir = environ.get(
+      "XDG_RUNTIME_DIR", join(environ["HOME"], ".ssh"))
+  return join(runtime_dir, "copy_socket")
+
+
+#################### ########### ####################
+#################### Copy Region ####################
+#################### ########### ####################
+
+
+def cp(data: bytes) -> None:
   if environ.get("TMUX"):
     run(["tmux", "load-buffer", "-"], input=data)
 
-
-def copy(data: bytes) -> None:
-  tmux_cp(data)
   if which("pbcopy"):
     run(["pbcopy"], input=data)
-  else:
-    print("⚠️ No clipboard integration ⚠️", file=stderr)
-    exit(1)
+
+
+def copy() -> None:
+  path = socket_path()
+  data: bytes = stdin.read().strip("\n").encode()
+  cp(data)
+  if environ.get("SSH_TTY"):
+    with socket(AF_UNIX, SOCK_STREAM) as sock:
+      sock.connect(path)
+      sock.sendall(data)
+      sock.sendall(b'\0\n')
+
+
+#################### ############ ####################
+#################### Paste Region ####################
+#################### ############ ####################
 
 
 def paste() -> None:
@@ -45,7 +70,12 @@ def paste() -> None:
     exit(1)
 
 
-def csshd() -> str:
+#################### ########### ####################
+#################### CSSH Region ####################
+#################### ########### ####################
+
+
+def cssh_prog() -> str:
   home = environ["HOME"]
   canonical = join(__dir__, "csshd")
 
@@ -57,9 +87,9 @@ def csshd() -> str:
     return canonical
 
 
-def local_daemon(args: List[str]) -> None:
-  prog = csshd()
-  process = Popen(
+def cssh_run(args: List[str]) -> None:
+  prog = cssh_prog()
+  process: Popen = Popen(
       ["ssh", *args, f"{prog}"],
       stdout=PIPE,
       stderr=PIPE)
@@ -70,18 +100,27 @@ def local_daemon(args: List[str]) -> None:
     if code:
       print(f"ssh exited - {code}", file=stderr)
       print(process.stderr.read().decode(), file=stderr)
-      print("\a")
       return
 
     line: bytes = process.stdout.readline()
     for b in line:
       if b == 0:
-        clippy(buf)
+        copy(buf)
         buf.clear()
         break
       else:
         buf.append(b)
 
+
+def cssh() -> None:
+  while True:
+    cssh_run(argv[1:])
+    sleep(1)
+
+
+#################### ############ ####################
+#################### CSSHD Region ####################
+#################### ############ ####################
 
 def clean_socket(path: str) -> None:
   try:
@@ -90,7 +129,7 @@ def clean_socket(path: str) -> None:
     pass
 
 
-def remote_daemon(path: str) -> None:
+def csshd() -> None:
   class Handler(BaseRequestHandler):
     def handle(self) -> None:
       with self.request.makefile() as fd:
@@ -98,31 +137,28 @@ def remote_daemon(path: str) -> None:
         stdout.write(data)
         stdout.flush()
 
+  path = socket_path()
   clean_socket(path)
   with UnixStreamServer(path, Handler) as srv:
     srv.serve_forever()
 
 
-def remote_copy(path: str, data: str) -> None:
-  with socket(AF_UNIX, SOCK_STREAM) as sock:
-    sock.connect(path)
-    sock.sendall(data)
-    sock.sendall(b'\0\n')
+#################### ########### ####################
+#################### Main Region ####################
+#################### ########### ####################
 
 
 def main() -> None:
   name = basename(argv[0])
 
-  runtime_dir = environ.get(
-      "XDG_RUNTIME_DIR", join(environ["HOME"], ".ssh"))
-  socket_path = join(runtime_dir, "copy_socket")
-
   if name == "cssh":
-    while True:
-      local_daemon(argv[1:])
-      sleep(1)
-  if name == "csshd":
-    remote_daemon(socket_path)
+    cssh()
+  elif name == "csshd":
+    csshd()
+  elif name in {"p", "pbpaste"}:
+    paste()
+  elif name in {"c", "pbcopy", "xclip"}:
+    copy()
 
 
 try:
