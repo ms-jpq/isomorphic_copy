@@ -63,6 +63,14 @@ def copy() -> None:
   cp_data(data)
 
 
+def is_copy(name: str, args: List[str]) -> bool:
+  if name in {"c", "pbcopy"}:
+    return True
+  elif name == "xclip" and "-o" not in args:
+    return True
+  else:
+    return False
+
 #################### ############ ####################
 #################### Paste Region ####################
 #################### ############ ####################
@@ -76,6 +84,15 @@ def paste() -> None:
   else:
     print("⚠️ No clipboard integration ⚠️", file=stderr)
     exit(1)
+
+
+def is_paste(name: str, args: List[str]) -> bool:
+  if name in {"c", "pbcopy"}:
+    return True
+  elif name == "xclip" and "-o" in args:
+    return True
+  else:
+    return False
 
 
 #################### ########### ####################
@@ -165,10 +182,13 @@ def main() -> None:
     cssh()
   elif name == "csshd":
     csshd()
-  elif name in {"p", "pbpaste"}:
+  elif is_paste(name, argv[1:]):
     paste()
-  elif name in {"c", "pbcopy", "xclip"}:
+  elif is_copy(name, argv[1:]):
     copy()
+  else:
+    print(f"Unknown -- {name} {' '.join(argv[1:])}", file=stderr)
+    exit(1)
 
 
 try:
