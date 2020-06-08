@@ -9,22 +9,22 @@ from socketserver import BaseRequestHandler, UnixStreamServer
 from subprocess import run, Popen, PIPE
 from sys import argv, stderr, stdin, stdout
 from time import sleep
-from typing import List, Tuple, Union
+from typing import List, Iterator, Tuple, Union
 
 
 __dir__ = dirname(realpath(__file__))
 
 
 def fake_path() -> None:
-  paths = (path
-           for path in environ["PATH"].split(":")
-           if path != __dir__)
+  paths: Iterator[str] = (path
+                          for path in environ["PATH"].split(":")
+                          if path != __dir__)
   environ["PATH"] = ":".join(paths)
 
 
 def clippy(data: str) -> None:
-  # if environ.get("TMUX", None):
-  #   run(["tmux", "set-buffer", data])
+  if environ.get("TMUX", None):
+    run(["tmux", "load-buffer", "-"], input=data.encode())
 
   if which("pbcopy"):
     run(["pbcopy"], input=data.encode())
