@@ -44,7 +44,7 @@ def cp(data: bytes) -> None:
     run(["pbcopy"], input=data)
 
 
-def rcp(data: byes) -> None:
+def rcp(data: bytes) -> None:
   path = socket_path()
   with socket(AF_UNIX, SOCK_STREAM) as sock:
     sock.connect(path)
