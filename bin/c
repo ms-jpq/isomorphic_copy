@@ -42,9 +42,9 @@ def cp(data: bytes) -> None:
 
   if which("pbcopy"):
     run(["pbcopy"], input=data)
-  elif which("wl-copy"):
+  elif which("wl-copy") and environ.get("WAYLAND_DISPLAY"):
     run(["wl-copy"], input=data)
-  elif which("xclip"):
+  elif which("xclip") and environ.get("DISPLAY"):
     run(["xclip"], input=data)
 
 
@@ -75,9 +75,9 @@ def copy() -> None:
 def paste() -> None:
   if which("pbpaste"):
     run(["pbpaste"])
-  elif which("wl-paste"):
+  elif which("wl-paste") and environ.get("WAYLAND_DISPLAY"):
     run(["wl-paste"])
-  elif which("xclip"):
+  elif which("xclip") and environ.get("DISPLAY"):
     run(["xclip", "-out"])
   elif environ.get("TMUX"):
     run(["tmux", "save-buffer", "-"])
