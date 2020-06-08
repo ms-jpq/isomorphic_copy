@@ -6,15 +6,17 @@ set -eu
 # Skip Slow Shims #
 ###################
 
+prog="$0"
 iso_cp="$(dirname "$(dirname "$0")")/isomorphic-cp"
+
 
 if [ -x /usr/local/bin/python3 ]
 then
-  /usr/local/bin/python3 "$iso_cp" "$@"
+  /usr/local/bin/python3 "$iso_cp" "$prog" "$@"
 elif [ -x /usr/bin/python3 ]
 then
-  /usr/bin/python3 "$iso_cp" "$@"
+  /usr/bin/python3 "$iso_cp" "$prog" "$@"
 else
-  /usr/bin/env -S python3 "$iso_cp" "$@"
+  /usr/bin/env -S python3 "$iso_cp" "$prog" "$@"
 fi
 

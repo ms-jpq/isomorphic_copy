@@ -16,7 +16,7 @@ from typing import List
 #################### ########### ####################
 
 __bin__ = join(dirname(__file__), "bin")
-__name__ = argv[1]
+__name__ = basename(argv[1])
 __args__ = argv[2:]
 
 
