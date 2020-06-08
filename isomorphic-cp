@@ -18,7 +18,7 @@ from typing import List
 __bin__ = join(dirname(__file__), "bin")
 __name__ = basename(argv[1])
 __args__ = argv[2:]
-__socket_path__ = join("tmp", "iso_cp", "cp_socket")
+__socket_path__ = join("/", "tmp", "iso_cp", "cp_socket")
 
 
 def path_mask() -> None:
