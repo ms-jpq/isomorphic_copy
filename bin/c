@@ -37,13 +37,6 @@ def clippy(data: bytes) -> None:
     exit(1)
 
 
-def clean_socket(path: str) -> None:
-  try:
-    unlink(path)
-  except IOError:
-    pass
-
-
 def csshd() -> str:
   home = environ["HOME"]
   canonical = join(__dir__, "csshd")
@@ -81,6 +74,13 @@ def local_daemon(args: List[str]) -> None:
         break
       else:
         buf.append(b)
+
+
+def clean_socket(path: str) -> None:
+  try:
+    unlink(path)
+  except IOError:
+    pass
 
 
 def remote_daemon(path: str) -> None:
