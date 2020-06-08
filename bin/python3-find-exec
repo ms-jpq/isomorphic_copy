@@ -3,9 +3,9 @@
 set -eu
 set -o pipefail
 
-####################
-# Avoid Slow Shims #
-####################
+###################
+# Skip Slow Shims #
+###################
 
 
 name="$1"
