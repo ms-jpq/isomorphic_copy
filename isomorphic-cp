@@ -41,9 +41,11 @@ def cp(data: bytes) -> None:
 
   if which("pbcopy"):
     run(["pbcopy"], input=data)
-  elif which("wl-copy") and environ.get("WAYLAND_DISPLAY"):
+
+  elif environ.get("WAYLAND_DISPLAY") and which("wl-copy"):
     run(["wl-copy"], input=data)
-  elif which("xclip") and environ.get("DISPLAY"):
+
+  elif environ.get("DISPLAY") and which("xclip"):
     run(["xclip"], input=data)
 
 
@@ -73,12 +75,17 @@ def copy() -> None:
 def paste() -> None:
   if which("pbpaste"):
     run(["pbpaste"])
-  elif which("wl-paste") and environ.get("WAYLAND_DISPLAY"):
+
+  elif environ.get("WAYLAND_DISPLAY") and which("wl-paste"):
     run(["wl-paste"])
-  elif which("xclip") and environ.get("DISPLAY"):
+
+  elif environ.get("DISPLAY") and which("xclip"):
     run(["xclip", "-out"])
+
   elif environ.get("TMUX"):
+    run(["xclip", "-out"])
     run(["tmux", "save-buffer", "-"])
+
   else:
     print("⚠️ No clipboard integration ⚠️", file=stderr)
     exit(1)
