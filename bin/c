@@ -68,9 +68,8 @@ def local_daemon(args: List[str]) -> None:
     line: bytes = process.stdout.readline()
     for b in line:
       if b == 0:
-        data: str = buf.decode()
-        buf = bytearray()
-        clippy(data)
+        clippy(buf)
+        buf.clear()
         break
       else:
         buf.append(b)
