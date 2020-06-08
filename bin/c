@@ -104,26 +104,25 @@ def cssh_prog() -> str:
 
 def cssh_cmd() -> List[str]:
   lookup = {"cssh": ["ssh"],
-            "cdocker": ["docker", "exec", "-t"],
-            "ckube": ["kubectl", "exec", "-i", "-t"]}
+            "cdocker": ["docker", "exec", "-it"],
+            "ckube": ["kubectl", "exec", "-it"]}
   name = basename(argv[0])
   return lookup[name]
 
 
 def cssh_run(args: List[str]) -> None:
-  prog = cssh_prog()
   cmd = cssh_cmd()
-  process: Popen = Popen(
-      [*cmd, *args, prog],
-      stdout=PIPE,
-      stderr=PIPE)
-
+  prog = cssh_prog()
+  exe = [*cmd, *args, prog]
+  process: Popen = Popen(exe,
+                         stdout=PIPE,
+                         stderr=PIPE)
   buf = bytearray()
 
   while True:
     code = process.poll()
     if code:
-      print(f"ssh exited - {code}", file=stderr)
+      print(f"{' '.join(exe)}\ndaemon exited - {code}", file=stderr)
       print(process.stderr.read().decode(), file=stderr)
       return
 

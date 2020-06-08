@@ -8,15 +8,13 @@ set -o pipefail
 ###################
 
 
-name="$1"
-
 if [[ -x /usr/local/bin/python3 ]]
 then
-  /usr/local/bin/python3 "$name"
+  /usr/local/bin/python3 "$@"
 elif [[ -x /usr/bin/python3 ]]
 then
-  /usr/bin/python3 "$name"
+  /usr/bin/python3 "$@"
 else
-  /usr/bin/env -S python3 "$name"
+  /usr/bin/env -S python3 "$@"
 fi
 
