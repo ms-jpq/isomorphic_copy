@@ -99,7 +99,7 @@ def remote_daemon(path: str) -> None:
 def remote_copy(path: str, data: str) -> None:
   with socket(AF_UNIX, SOCK_STREAM) as sock:
     sock.connect(path)
-    sock.sendall(data.encode())
+    sock.sendall(data)
     sock.sendall(b'\0\n')
 
 
