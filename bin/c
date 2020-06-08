@@ -42,6 +42,10 @@ def cp(data: bytes) -> None:
 
   if which("pbcopy"):
     run(["pbcopy"], input=data)
+  elif which("wl-copy"):
+    run(["wl-copy"], input=data)
+  elif which("xclip"):
+    run(["xclip"], input=data)
 
 
 def rcp(data: bytes) -> None:
@@ -71,6 +75,10 @@ def copy() -> None:
 def paste() -> None:
   if which("pbpaste"):
     run(["pbpaste"])
+  elif which("wl-paste"):
+    run(["wl-paste"])
+  elif which("xclip"):
+    run(["xclip", "-out"])
   elif environ.get("TMUX"):
     run(["tmux", "save-buffer", "-"])
   else:
