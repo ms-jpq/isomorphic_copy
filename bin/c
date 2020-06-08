@@ -87,7 +87,7 @@ def paste() -> None:
 
 
 def is_paste(name: str, args: List[str]) -> bool:
-  if name in {"c", "pbcopy"}:
+  if name in {"p", "pbpaste"}:
     return True
   elif name == "xclip" and "-o" in args:
     return True
