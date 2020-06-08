@@ -22,12 +22,16 @@ def fake_path() -> None:
   environ["PATH"] = ":".join(paths)
 
 
-def clippy(data: str) -> None:
+def tmux_cp(data: bytes) -> None:
   if environ.get("TMUX", None):
-    run(["tmux", "load-buffer", "-"], input=data.encode())
+    run(["tmux", "load-buffer", "-"], input=data)
+
+
+def clippy(data: bytes) -> None:
+  tmux_cp(data)
 
   if which("pbcopy"):
-    run(["pbcopy"], input=data.encode())
+    run(["pbcopy"], input=data)
   else:
     print("⚠️ No clipboard integration ⚠️", file=stderr)
     exit(1)
@@ -113,8 +117,9 @@ def cp() -> None:
   if name == "csshd":
     remote_daemon(socket_path)
   else:
-    data: str = stdin.read().strip("\n")
+    data: bytes = stdin.read().strip("\n").encode()
     if environ.get("SSH_TTY") is not None:
+      tmux_cp(data)
       remote_copy(socket_path, data)
     else:
       clippy(data)
