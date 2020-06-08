@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from os import environ, getcwd, unlink
-from os.path import basename, dirname, join, realpath, relpath
+from os.path import abspath, basename, dirname, join, relpath
 from shutil import which
 from socket import AF_UNIX, SOCK_STREAM, socket
 from socketserver import BaseRequestHandler, UnixStreamServer
@@ -15,7 +15,7 @@ from typing import List
 #################### INIT Region ####################
 #################### ########### ####################
 
-__dir__ = dirname(realpath(__file__))
+__dir__ = dirname(abspath(__file__))
 
 
 def path_mask() -> None:
@@ -44,15 +44,19 @@ def cp(data: bytes) -> None:
     run(["pbcopy"], input=data)
 
 
-def copy() -> None:
+def rcp(data: byes) -> None:
   path = socket_path()
+  with socket(AF_UNIX, SOCK_STREAM) as sock:
+    sock.connect(path)
+    sock.sendall(data)
+    sock.sendall(b'\0\n')
+
+
+def copy() -> None:
   data: bytes = stdin.read().strip("\n").encode()
   cp(data)
   if environ.get("SSH_TTY"):
-    with socket(AF_UNIX, SOCK_STREAM) as sock:
-      sock.connect(path)
-      sock.sendall(data)
-      sock.sendall(b'\0\n')
+    rcp(data)
 
 
 #################### ############ ####################
@@ -80,8 +84,7 @@ def cssh_prog() -> str:
   canonical = join(__dir__, "csshd")
 
   if canonical.startswith(home):
-    p = join(getcwd(), canonical)
-    prog = relpath(p, home)
+    prog = relpath(canonical, home)
     return f"$HOME/{prog}"
   else:
     return canonical
@@ -90,7 +93,7 @@ def cssh_prog() -> str:
 def cssh_run(args: List[str]) -> None:
   prog = cssh_prog()
   process: Popen = Popen(
-      ["ssh", *args, f"{prog}"],
+      ["ssh", *args, prog],
       stdout=PIPE,
       stderr=PIPE)
 
@@ -149,6 +152,7 @@ def csshd() -> None:
 
 
 def main() -> None:
+  path_mask()
   name = basename(argv[0])
 
   if name == "cssh":
