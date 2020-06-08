@@ -8,15 +8,16 @@ set -eu
 
 prog="$0"
 iso_cp="$(dirname "$(dirname "$0")")/isomorphic-cp"
+cmds=("$iso_cp" "$prog" "$@")
 
 
 if [ -x /usr/local/bin/python3 ]
 then
-  /usr/local/bin/python3  "$iso_cp" "$prog" "$@"
+  /usr/local/bin/python3 "${cmds[@]}"
 elif [ -x /usr/bin/python3 ]
 then
-  /usr/bin/python3        "$iso_cp" "$prog" "$@"
+  /usr/bin/python3 "${cmds[@]}"
 else
-  /usr/bin/env -S python3 "$iso_cp" "$prog" "$@"
+  /usr/bin/env -S python3 "${cmds[@]}"
 fi
 
