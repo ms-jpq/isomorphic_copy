@@ -1,1 +1,86 @@
-c
+#!/usr/bin/env python3
+
+from os import environ, unlink
+from os.path import basename, dirname, join, realpath
+from socketserver import BaseRequestHandler, UnixStreamServer
+from subprocess import run, PIPE
+from sys import argv, stderr, stdout
+from time import sleep
+from typing import List
+
+
+__dir__ = dirname(realpath(__file__))
+
+
+def csshd() -> str:
+  home = environ["HOME"]
+  canonical = join(__dir__, "csshd")
+
+  if canonical.startswith(home):
+    p = join(getcwd(), canonical)
+    prog = relpath(p, home)
+    return f"$HOME/{prog}"
+  else:
+    return canonical
+
+
+def local_daemon(args: List[str]) -> None:
+  prog = csshd()
+  process = Popen(
+      ["ssh", *args, f"{prog}"],
+      stdout=PIPE,
+      stderr=PIPE)
+
+  buf = bytearray()
+  while True:
+    code = process.poll()
+    if code:
+      print(f"ssh exited - {code}", file=stderr)
+      print(process.stderr.read().decode(), file=stderr)
+      print("\a")
+      return
+
+    line: bytes = process.stdout.readline()
+    for b in line:
+      if b == 0:
+        clippy(buf)
+        buf.clear()
+        break
+      else:
+        buf.append(b)
+
+
+def clean_socket(path: str) -> None:
+  try:
+    unlink(path)
+  except IOError:
+    pass
+
+
+def remote_daemon(path: str) -> None:
+  class Handler(BaseRequestHandler):
+    def handle(self) -> None:
+      with self.request.makefile() as fd:
+        data: str = fd.read()
+        stdout.write(data)
+        stdout.flush()
+
+  clean_socket(path)
+  with UnixStreamServer(path, Handler) as srv:
+    srv.serve_forever()
+
+
+def main() -> None:
+  name = basename(argv[0])
+
+  runtime_dir = environ.get(
+      "XDG_RUNTIME_DIR", join(environ["HOME"], ".ssh"))
+  socket_path = join(runtime_dir, "copy_socket")
+
+  if name == "cssh":
+    while True:
+      local_daemon(argv[1:])
+      sleep(1)
+  if name == "csshd":
+    remote_daemon(socket_path)
+

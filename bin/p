@@ -5,21 +5,18 @@ from os.path import dirname, realpath
 from shutil import which
 from subprocess import run
 from sys import stderr
-from typing import Iterator
 
 
 __dir__ = dirname(realpath(__file__))
 
 
 def fake_path() -> None:
-  paths: Iterator[str] = (path
-                          for path in environ["PATH"].split(":")
-                          if path != __dir__)
-  environ["PATH"] = ":".join(paths)
+  environ["PATH"] = ":".join((path
+                              for path in environ["PATH"].split(":")
+                              if path != __dir__))
 
 
 def clippy() -> None:
-
   if which("pbpaste"):
     run(["pbpaste"])
   elif environ.get("TMUX"):
