@@ -12,6 +12,17 @@ from time import sleep
 from typing import List, Tuple, Union
 
 
+__dir__ = dirname(realpath(__file__))
+
+
+def fake_path() -> None:
+  shim_path = __dir__
+  paths = (path
+           for path in environ["PATH"].split(":")
+           if path != shim_path)
+  environ["PATH"] = ":".join(paths)
+
+
 def clippy(data: str) -> None:
   # if environ.get("TMUX", None):
   #   run(["tmux", "set-buffer", data])
@@ -31,7 +42,7 @@ def clean_socket(path: str) -> None:
 
 def csshd() -> str:
   home = environ["HOME"]
-  canonical = join(dirname(__file__), "csshd")
+  canonical = join(__dir__, "csshd")
 
   if canonical.startswith(home):
     p = join(getcwd(), canonical)
@@ -110,6 +121,7 @@ def cp() -> None:
 
 
 def main() -> None:
+  fake_path()
   try:
     cp()
   except KeyboardInterrupt:
