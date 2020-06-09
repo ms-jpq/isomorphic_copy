@@ -20,7 +20,10 @@ __dir__ = dirname(__file__)
 __bin__ = join(dirname(__file__), "bin")
 __name__ = basename(argv[1])
 __args__ = argv[2:]
-__socket_path__ = join(__dir__, "socket", "cp.socket")
+__tmp__ = join(__dir__, "tmp")
+__local_write__ = environ.get("ISO_CP_NOWRITE") is None
+__socket_path__ = join(__tmp__, "cp.socket")
+__write_path__ = join(__tmp__, "clipboard.txt")
 
 
 def path_mask() -> None:
@@ -35,9 +38,17 @@ def path_mask() -> None:
 #################### ########### ####################
 
 
+def local_copy(data: bytes) -> None:
+  with open(__write_path__, "wb") as fd:
+    fd.write(data)
+
+
 def cp(data: bytes) -> None:
   if environ.get("TMUX"):
     run(["tmux", "load-buffer", "-"], input=data)
+
+  if __local_write__:
+    local_copy(data)
 
   if which("pbcopy"):
     run(["pbcopy"], input=data)
@@ -75,6 +86,10 @@ def copy() -> None:
 #################### Paste Region ####################
 #################### ############ ####################
 
+def local_paste() -> None:
+  with open(__write_path__, "r") as fd:
+    print(fd.read())
+
 
 def paste() -> None:
   if which("pbpaste"):
@@ -87,8 +102,10 @@ def paste() -> None:
     run(["xclip", "-out"])
 
   elif environ.get("TMUX"):
-    run(["xclip", "-out"])
     run(["tmux", "save-buffer", "-"])
+
+  elif __local_write__:
+    local_paste()
 
   else:
     print("⚠️ No clipboard integration ⚠️", file=stderr)
