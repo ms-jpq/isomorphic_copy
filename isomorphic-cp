@@ -126,7 +126,8 @@ def paste() -> None:
 
 def cssh_cmd() -> List[str]:
   lookup = {"cssh": ["ssh"],
-            "cdocker": ["docker", "exec"]}
+            "cdocker": ["docker", "exec"],
+            "clxd": ["lxc", "exec"]}
   return lookup[__name__]
 
 
@@ -225,7 +226,7 @@ def is_paste() -> bool:
 def main() -> None:
   path_mask()
 
-  if __name__ in {"cssh", "cdocker"}:
+  if __name__ in {"cssh", "cdocker", "clxd"}:
     cssh()
   elif __name__ == "csshd":
     csshd()
