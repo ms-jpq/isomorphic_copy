@@ -2,7 +2,7 @@ FROM alpine:latest
 
 
 # Requirements
-RUN apk add --no-cache python3 \
+RUN apk add --no-cache python3 && \
     mkdir "$HOME/.config" && \
     mkdir "$HOME/.config/isomorphic-copy"
 
