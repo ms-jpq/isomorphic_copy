@@ -14,7 +14,7 @@ Clone this repo to the same location on two machines. Either relative to `~` or 
 
 Add `isomorphic-copy/bin` to your `PATH` for example:
 
-`export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in my `rc` file.
+`export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in your `bash/zshrc` file.
 
 ---
 
@@ -33,11 +33,37 @@ Launch remote daemon with
 
 `clxd <lxd container name>`
 
-Once daemon is launched, remote `c` will propagate to local system clipboard.
+Once daemon is launched, remote copy will propagate to local system clipboard.
 
 Remote applications that use `xclip`, `pbcopy`, `wl-copy` will propagate to local system clipboard.
 
 ## Integrations
 
-## How to install
+### Tmux
+
+Copy will automatically propagate to local / remote tmux clipboard.
+
+If daemon is run under tmux, copy will also propagate to the local tmux clipboard.
+
+If no system clipboard is available, copy / paste will use tmux clipboard.
+
+### Vim
+
+Vim will only use `xclip`  if the x11 environmental variable `DISPLAY` is set.
+
+Add this snippet to your `vimrc`, and Vim will automatically use `isomorphic-copy`
+
+```viml
+if getenv('DISPLAY') == v:null
+  exe setenv('DISPLAY', 'FAKE')
+endif
+```
+
+### Others
+
+### Fallback
+
+If no system / tmux clipboard is found, setting environmental variable `ISOCP_USE_FILE=1` can use the filesystem as the clipboard.
+
+It write to the git repo.
 
