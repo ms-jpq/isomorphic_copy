@@ -134,10 +134,10 @@ def paste() -> None:
 #################### ########### ####################
 
 
-def cssh_cmd() -> List[str]:
-  lookup = {"cssh": ["ssh"],
-            "cdocker": ["docker", "exec"],
-            "clxd": ["lxc", "exec"]}
+def cssh_cmd() -> Tuple[List[str], List[str]]:
+  lookup = {"cssh": (["ssh"], []),
+            "cdocker": (["docker", "exec"], []),
+            "clxd": (["lxc", "exec"], ["--"])}
   return lookup[__name__]
 
 
@@ -153,9 +153,9 @@ def cssh_prog() -> str:
 
 
 def cssh_run(args: List[str]) -> None:
-  cmd = cssh_cmd()
+  prev, post = cssh_cmd()
   prog = cssh_prog()
-  exe = [*cmd, *args, "sh", "-c", f'"{prog}"']
+  exe = [*prev, *args, *post, "sh", "-c", f'"{prog}"']
   process: Popen = Popen(exe,
                          stdout=PIPE,
                          stderr=PIPE)
