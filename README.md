@@ -12,7 +12,7 @@ Works out of the box with programs that use those commands.
 
 Clone this repo to the same location on two machines. Either relative to `~` or `/`.
 
-Add `isomorphic-copy/bin` to your `PATH` for example:
+**Prepend** `isomorphic-copy/bin` to your `PATH` for example:
 
 `export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in your `bash/zshrc` file.
 
@@ -71,3 +71,16 @@ If no system / tmux clipboard is found, setting environmental variable `ISOCP_US
 
 It write inside the git repo, put it somewhere safe.
 
+## How does it work?
+
+`isomorphic-copy` will use the system & tmux clipboard if run locally. It will try to detect being ran remotely, by either `SSH_TTY` env var, or `.dockerenv` file, etc.
+
+If ran as a daemon, it will find a copy of itself on the remote machine, start itself on the remote, and listen on an unix socket created inside the git repo.
+
+Remote copies then try to write to the unix socket, which will propagate via the two daemons back to your local machine.
+
+This works pretty much everywhere, because we are only using `stdin` and `stdout`.
+
+## How does it masquerade as xclip?
+
+`isomorphic-copy/bin` contains a shim of `xclip`, `pbcopy`, etc. It will intercept all calls to those programs, and forward it up. 
