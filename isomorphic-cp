@@ -17,7 +17,7 @@ from typing import List
 
 
 __dir__ = dirname(__file__)
-__bin__ = join(dirname(__file__), "bin")
+__bin__ = join(__dir__, "bin")
 __name__ = basename(argv[1])
 __args__ = argv[2:]
 __tmp__ = join(__dir__, "tmp")
@@ -33,6 +33,16 @@ def path_mask() -> None:
   environ["PATH"] = ":".join(paths)
 
 
+class ProcErr(BaseException):
+  pass
+
+
+def call(prog: str, *args: List[str], input: bytes = None) -> None:
+  ret = run([prog, *args], input=input)
+  if ret.returncode != 0:
+    raise ProcErr()
+
+
 #################### ########### ####################
 #################### Copy Region ####################
 #################### ########### ####################
@@ -45,16 +55,16 @@ def local_copy(data: bytes) -> None:
 
 def cp(data: bytes) -> None:
   if environ.get("TMUX"):
-    run(["tmux", "load-buffer", "-"], input=data)
+    call("tmux", "load-buffer", "-", input=data)
 
   if which("pbcopy"):
-    run(["pbcopy"], input=data)
+    call("pbcopy", input=data)
 
   elif environ.get("WAYLAND_DISPLAY") and which("wl-copy"):
-    run(["wl-copy"], input=data)
+    call("wl-copy", input=data)
 
   elif environ.get("DISPLAY") and which("xclip"):
-    run(["xclip"], input=data)
+    call("xclip", input=data)
 
   elif __local_write__:
     local_copy(data)
@@ -100,16 +110,16 @@ def local_paste() -> None:
 
 def paste() -> None:
   if which("pbpaste"):
-    run(["pbpaste"])
+    call("pbpaste")
 
   elif environ.get("WAYLAND_DISPLAY") and which("wl-paste"):
-    run(["wl-paste"])
+    call("wl-paste")
 
   elif environ.get("DISPLAY") and which("xclip"):
-    run(["xclip", "-out"])
+    call("xclip", "-out")
 
   elif environ.get("TMUX"):
-    run(["tmux", "save-buffer", "-"])
+    call("tmux", "save-buffer", "-")
 
   elif __local_write__:
     local_paste()
@@ -161,7 +171,10 @@ def cssh_run(args: List[str]) -> None:
     line: bytes = process.stdout.readline()
     for b in line:
       if b == 0:
-        cp_data(buf)
+        try:
+          cp_data(buf)
+        except:
+          pass
         buf.clear()
         break
       else:
