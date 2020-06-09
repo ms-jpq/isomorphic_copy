@@ -8,7 +8,7 @@ from socketserver import BaseRequestHandler, UnixStreamServer
 from subprocess import PIPE, Popen, run
 from sys import argv, stderr, stdin, stdout
 from time import sleep
-from typing import List
+from typing import List, Tuple
 
 
 #################### ########### ####################
