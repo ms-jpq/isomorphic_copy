@@ -83,4 +83,4 @@ This works pretty much everywhere, because we are only using `stdin` and `stdout
 
 ## How does it masquerade as xclip?
 
-`isomorphic-copy/bin` contains a shim of `xclip`, `pbcopy`, etc. It will intercept all calls to those programs, and forward it up. 
+`isomorphic-copy/bin` contains a shim of `xclip`, `pbcopy`, etc. It will intercept all calls to those programs, and forward it up, to the local clipboards and remote daemons.
