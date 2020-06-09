@@ -16,12 +16,12 @@ from typing import List
 #################### ########### ####################
 
 
-__dir__ = dirname(__file__)
-__bin__ = join(__dir__, "bin")
 __name__ = basename(argv[1])
 __args__ = argv[2:]
-__tmp__ = join(__dir__, "tmp")
 __local_write__ = environ.get("ISOCP_USE_FILE") is not None
+__dir__ = dirname(__file__)
+__bin__ = join(__dir__, "bin")
+__tmp__ = join(__dir__, "tmp")
 __socket_path__ = join(__tmp__, "cp.socket")
 __write_path__ = join(__tmp__, "clipboard.txt")
 
