@@ -1,9 +1,8 @@
-FROM ubuntu:latest
+FROM alpine:latest
 
 
 # Requirements
-RUN apt update && \
-    apt upgrade -y python3 && \
+RUN apk add --no-cache python3 \
     mkdir "$HOME/.config" && \
     mkdir "$HOME/.config/isomorphic-copy"
 
