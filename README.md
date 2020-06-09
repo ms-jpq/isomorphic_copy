@@ -61,7 +61,7 @@ endif
 
 ### Others
 
-Most applications will work out of the box. (such as lazygit, for example).
+Most CLI applications will work out of the box. (such as lazygit, for example).
 
 If not, check if they require some environmental variables like Vim.
 
