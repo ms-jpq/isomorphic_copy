@@ -116,7 +116,7 @@ def cssh_prog() -> str:
 def cssh_run(args: List[str]) -> None:
   cmd = cssh_cmd()
   prog = cssh_prog()
-  exe = [*cmd, *args, "bash", "-c", f"'{prog}'"]
+  exe = [*cmd, *args, "sh", "-c", f'"{prog}"']
   process: Popen = Popen(exe,
                          stdout=PIPE,
                          stderr=PIPE)
