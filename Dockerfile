@@ -11,5 +11,6 @@ RUN apt update && \
 # Install
 COPY . /root/.config/isomorphic-copy/
 WORKDIR /root/.config/isomorphic-copy/
-ENV PATH="/root/.config/isomorphic-copy/bin:$PATH"
+ENV PATH="/root/.config/isomorphic-copy/bin:$PATH" \
+    ISOCP_USE_FILE=1
 
