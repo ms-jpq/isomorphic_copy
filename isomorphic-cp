@@ -47,9 +47,6 @@ def cp(data: bytes) -> None:
   if environ.get("TMUX"):
     run(["tmux", "load-buffer", "-"], input=data)
 
-  if __local_write__:
-    local_copy(data)
-
   if which("pbcopy"):
     run(["pbcopy"], input=data)
 
@@ -58,6 +55,9 @@ def cp(data: bytes) -> None:
 
   elif environ.get("DISPLAY") and which("xclip"):
     run(["xclip"], input=data)
+
+  elif __local_write__:
+    local_copy(data)
 
 
 def rcp(data: bytes) -> None:
@@ -235,4 +235,3 @@ try:
   main()
 except KeyboardInterrupt:
   pass
-
