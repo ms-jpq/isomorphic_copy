@@ -9,6 +9,6 @@ RUN apt update && \
 
 
 # Install
-COPY . "$HOME/.config/isomorphic-copy/"
+COPY . /root/.config/isomorphic-copy/
 ENV PATH="/root/.config/isomorphic-copy/bin:$PATH"
 
