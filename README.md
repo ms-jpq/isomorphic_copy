@@ -1,10 +1,10 @@
 # Isomorphic Copy
 
-A cross platform clipboard.
+Cross platform clipboard.
 
 Works the same locally as over SSH, inside Docker containers, inside LXD containers etc.
 
-Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc.
+Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
 
 Works out of the box with programs that use those commands.
 
@@ -12,7 +12,7 @@ Works out of the box with programs that use those commands.
 
 Clone this repo to the same location on two machines. Either relative to `~` or `/`.
 
-Add `isomorphic-copy/bin` to your `PATH` for example:
+**Prepend** `isomorphic-copy/bin` to your `PATH` for example:
 
 `export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in your `bash/zshrc` file.
 
@@ -25,7 +25,7 @@ Add `isomorphic-copy/bin` to your `PATH` for example:
 
 ---
 
-Launch remote daemon with
+Launch remote daemon with one of
 
 `cssh <ssh-args>`
 
@@ -61,13 +61,26 @@ endif
 
 ### Others
 
-Most applications will work out of the box. (such as lazygit, for example).
+Most CLI applications will work out of the box. (such as lazygit, for example).
 
 If not, check if they require some environmental variables like Vim.
 
 ### Fallback
 
-If no system / tmux clipboard is found, setting environmental variable `ISOCP_USE_FILE=1` can use the filesystem as the clipboard.
+If no system / tmux clipboard is found, setting environmental variable `ISOCP_USE_FILE=1` will enable using a temp file as a crude clipboard.
 
-It write to the git repo.
+It write inside the git repo, put it somewhere safe.
 
+## How does it work?
+
+`isomorphic-copy` will use the system & tmux clipboard if run locally. It will try to detect being ran remotely, by either `SSH_TTY` env var, or `.dockerenv` file, etc.
+
+If ran as a daemon, it will find a copy of itself on the remote machine, start itself on the remote, and listen on an unix socket created inside the git repo.
+
+Remote copies then try to write to the unix socket, which will propagate via the two daemons back to your local machine.
+
+This works pretty much everywhere, because we are only using `stdin` and `stdout`.
+
+## How does it masquerade as xclip?
+
+`isomorphic-copy/bin` contains a shim of `xclip`, `pbcopy`, etc. It will intercept all calls to those programs, and forward it up, to the local clipboards and remote daemons.
