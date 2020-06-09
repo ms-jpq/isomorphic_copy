@@ -4,7 +4,7 @@ Cross platform clipboard.
 
 Works the same locally as over SSH, inside Docker containers, inside LXD containers etc.
 
-Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc.
+Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
 
 Works out of the box with programs that use those commands.
 
