@@ -8,8 +8,8 @@ RUN apk add --no-cache python3 && \
 
 
 # Install
-COPY . /root/.config/isomorphic-copy/
-WORKDIR /root/.config/isomorphic-copy/
+COPY .    /root/.config/isomorphic-copy/
+WORKDIR   /root/.config/isomorphic-copy/
 ENV PATH="/root/.config/isomorphic-copy/bin:$PATH" \
     ISOCP_USE_FILE=1
 
