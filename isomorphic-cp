@@ -115,7 +115,7 @@ def paste() -> None:
     local_paste()
 
   else:
-    print("⚠️ No clipboard integration ⚠️", file=stderr)
+    print("⚠️ No system clipboard detected ⚠️", file=stderr)
     exit(1)
 
 
