@@ -67,7 +67,7 @@ If not, check if they require some environmental variables like Vim.
 
 ### Fallback
 
-If no system / tmux clipboard is found, setting environmental variable `ISOCP_USE_FILE=1` can use the filesystem as the clipboard.
+If no system / tmux clipboard is found, setting environmental variable `ISOCP_USE_FILE=1` will enable using a temp file as a crude clipboard.
 
-It write to the git repo.
+It write inside the git repo, put it somewhere safe.
 
