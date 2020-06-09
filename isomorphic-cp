@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from os import chmod, environ, getcwd, makedirs, unlink
-from os.path import basename, dirname, join, relpath
+from os.path import basename, dirname, isfile, join, relpath
 from shutil import which
 from socket import AF_UNIX, SOCK_STREAM, socket
 from socketserver import BaseRequestHandler, UnixStreamServer
@@ -56,9 +56,13 @@ def rcp(data: bytes) -> None:
     sock.sendall(b'\0\n')
 
 
+def is_remote() -> bool:
+  return environ.get("SSH_TTY") or isfile("/.dockerenv")
+
+
 def cp_data(data: bytes) -> None:
   cp(data)
-  if environ.get("SSH_TTY"):
+  if is_remote():
     rcp(data)
 
 
