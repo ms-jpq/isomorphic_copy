@@ -21,7 +21,7 @@ __bin__ = join(dirname(__file__), "bin")
 __name__ = basename(argv[1])
 __args__ = argv[2:]
 __tmp__ = join(__dir__, "tmp")
-__local_write__ = environ.get("ISO_CP_NOWRITE") is None
+__local_write__ = environ.get("ISO_CP_USE_FILE") is not None
 __socket_path__ = join(__tmp__, "cp.socket")
 __write_path__ = join(__tmp__, "clipboard.txt")
 
@@ -62,9 +62,12 @@ def cp(data: bytes) -> None:
 
 def rcp(data: bytes) -> None:
   with socket(AF_UNIX, SOCK_STREAM) as sock:
-    sock.connect(__socket_path__)
-    sock.sendall(data)
-    sock.sendall(b'\0\n')
+    try:
+      sock.connect(__socket_path__)
+      sock.sendall(data)
+      sock.sendall(b'\0\n')
+    except:
+      pass
 
 
 def is_remote() -> bool:
@@ -235,3 +238,4 @@ try:
   main()
 except KeyboardInterrupt:
   pass
+
