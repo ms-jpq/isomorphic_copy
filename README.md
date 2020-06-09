@@ -2,7 +2,7 @@
 
 Cross platform clipboard.
 
-Works the same locally as over SSH, inside Docker containers, inside LXD containers etc.
+Works the same locally as over SSH, inside Docker containers, etc.
 
 Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
 
@@ -30,8 +30,6 @@ Launch remote daemon with one of
 `cssh <ssh-args>`
 
 `cdocker <docker container name>`
-
-`clxd <lxd container name>`
 
 Once daemon is launched, remote copy will propagate to local system clipboard.
 
@@ -84,3 +82,4 @@ This works pretty much everywhere, because we are only using `stdin` and `stdout
 ## How does it masquerade as xclip?
 
 `isomorphic-copy/bin` contains a shim of `xclip`, `pbcopy`, etc. It will intercept all calls to those programs, and forward it up, to the local clipboards and remote daemons.
+

@@ -81,7 +81,12 @@ def rcp(data: bytes) -> None:
 
 
 def is_remote() -> bool:
-  return environ.get("SSH_TTY") or isfile("/.dockerenv")
+  if environ.get("SSH_TTY"):
+    return True
+  elif isfile("/.dockerenv"):
+    return True
+  else:
+    return False
 
 
 def cp_data(data: bytes) -> None:
@@ -136,8 +141,7 @@ def paste() -> None:
 
 def cssh_cmd() -> Tuple[List[str], List[str]]:
   lookup = {"cssh": (["ssh"], []),
-            "cdocker": (["docker", "exec"], []),
-            "clxd": (["lxc", "exec"], ["--"])}
+            "cdocker": (["docker", "exec"], [])}
   return lookup[__name__]
 
 
@@ -237,7 +241,7 @@ def is_paste() -> bool:
 def main() -> None:
   path_mask()
 
-  if __name__ in {"cssh", "cdocker", "clxd"}:
+  if __name__ in {"cssh", "cdocker"}:
     cssh()
   elif __name__ == "csshd":
     csshd()
