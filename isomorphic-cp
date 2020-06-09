@@ -156,9 +156,7 @@ def cssh_run(args: List[str]) -> None:
   prev, post = cssh_cmd()
   prog = cssh_prog()
   exe = [*prev, *args, *post, "sh", "-c", f'"{prog}"']
-  process: Popen = Popen(exe,
-                         stdout=PIPE,
-                         stderr=PIPE)
+  process: Popen = Popen(exe, stdout=PIPE, stderr=PIPE)
   buf = bytearray()
 
   while True:
@@ -176,7 +174,6 @@ def cssh_run(args: List[str]) -> None:
         except ProcErr:
           pass
         buf.clear()
-        break
       else:
         buf.append(b)
 
