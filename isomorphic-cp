@@ -104,7 +104,7 @@ def local_paste() -> None:
   try:
     with open(__write_path__, "r") as fd:
       print(fd.read())
-  except:
+  except OSError:
     pass
 
 
@@ -173,7 +173,7 @@ def cssh_run(args: List[str]) -> None:
       if b == 0:
         try:
           cp_data(buf)
-        except:
+        except ProcErr:
           pass
         buf.clear()
         break
