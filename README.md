@@ -25,7 +25,7 @@ Add `isomorphic-copy/bin` to your `PATH` for example:
 
 ---
 
-Launch remote daemon with
+Launch remote daemon with one of
 
 `cssh <ssh-args>`
 
