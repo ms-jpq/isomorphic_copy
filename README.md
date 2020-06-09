@@ -1,7 +1,5 @@
 # Isomorphic Copy
 
-## What it does
-
 A cross platform clipboard.
 
 Works the same locally as over SSH, inside Docker containers, inside LXD containers etc.
@@ -16,20 +14,28 @@ Clone this repo to the same location on two machines. Either relative to `~` or 
 
 Add `isomorphic-copy/bin` to your `PATH` for example:
 
-`export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"`
+`export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in my `rc` file.
 
-in my `rc` file.
+---
 
-You are done!
+`echo <my message> | c` :: Use `c` to copy
 
-Use `c` to copy
 
-`echo <my message> | c`
+`p > my_message.txt` :: Use `p` to paste
 
-Use `p` to paste
+---
 
-`p > my_message.txt`
+Launch remote daemon with
 
+`cssh <ssh-args>`
+
+`cdocker <docker container name>`
+
+`clxd <lxd container name>`
+
+Once daemon is launched, remote `c` will propagate to local system clipboard.
+
+Remote applications that use `xclip`, `pbcopy`, `wl-copy` will propagate to local system clipboard.
 
 ## Integrations
 
