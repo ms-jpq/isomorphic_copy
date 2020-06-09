@@ -76,7 +76,7 @@ def rcp(data: bytes) -> None:
       sock.connect(__socket_path__)
       sock.sendall(data)
       sock.sendall(b'\0\n')
-    except:
+    except OSError:
       pass
 
 
