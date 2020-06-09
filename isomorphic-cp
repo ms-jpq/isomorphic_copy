@@ -89,9 +89,13 @@ def copy() -> None:
 #################### Paste Region ####################
 #################### ############ ####################
 
+
 def local_paste() -> None:
-  with open(__write_path__, "r") as fd:
-    print(fd.read())
+  try:
+    with open(__write_path__, "r") as fd:
+      print(fd.read())
+  except:
+    pass
 
 
 def paste() -> None:
