@@ -18,10 +18,10 @@ Add `isomorphic-copy/bin` to your `PATH` for example:
 
 ---
 
-`echo <my message> | c` :: Use `c` to copy
+`echo <my message> | c` :: Use `c` to copy to system clipboard
 
 
-`p > my_message.txt` :: Use `p` to paste
+`p > my_message.txt` :: Use `p` to paste from system clipboard
 
 ---
 
@@ -49,9 +49,9 @@ If no system clipboard is available, copy / paste will use tmux clipboard.
 
 ### Vim
 
-Vim will only use `xclip`  if the x11 environmental variable `DISPLAY` is set.
+Vim will only use `xclip` if the x11 environmental variable `DISPLAY` is set.
 
-Add this snippet to your `vimrc`, and Vim will automatically use `isomorphic-copy`
+Add this snippet to your `vimrc`, and Vim will automatically use the fake `xclip`.
 
 ```viml
 if getenv('DISPLAY') == v:null
@@ -60,6 +60,10 @@ endif
 ```
 
 ### Others
+
+Most applications will work out of the box. (such as lazygit, for example).
+
+If not, check if they require some environmental variables like Vim.
 
 ### Fallback
 
