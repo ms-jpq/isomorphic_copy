@@ -1,6 +1,6 @@
 # Isomorphic Copy
 
-A cross platform clipboard.
+Cross platform clipboard.
 
 Works the same locally as over SSH, inside Docker containers, inside LXD containers etc.
 
