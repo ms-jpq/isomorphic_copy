@@ -3,13 +3,12 @@ FROM ubuntu:latest
 
 # Requirements
 RUN apt update && \
-    apt upgrade -y python3 git
+    apt upgrade -y python3 && \
+    mkdir "$HOME/.config" && \
+    mkdir "$HOME/.config/isomorphic-copy"
 
 
 # Install
-RUN mkdir "$HOME/.config" && \
-    cd "$HOME/.config" && \
-    git clone https://github.com/ms-jpq/isomorphic-copy.git
-
+COPY . "$HOME/.config/isomorphic-copy/"
 ENV PATH="/root/.config/isomorphic-copy/bin:$PATH"
 
