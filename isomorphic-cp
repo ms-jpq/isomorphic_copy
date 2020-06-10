@@ -3,6 +3,7 @@
 from asyncio import (StreamReader, StreamWriter, gather, get_event_loop,
                      open_unix_connection, sleep, start_unix_server)
 from asyncio.events import AbstractServer
+from asyncio.streams import IncompleteReadError
 from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
 from datetime import datetime
 from os import chmod, environ, getcwd, makedirs, unlink
@@ -170,10 +171,13 @@ async def cssh_run(args: List[str]) -> None:
       print(f"daemon exited - {code}", file=stderr)
       break
     else:
-      data: bytes = await proc.stdout.readuntil(b'\0')
-      time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-      print(f"\n-- RECV -- {time}\n")
-      await copy(data[:-1])
+      try:
+        data: bytes = await proc.stdout.readuntil(b'\0')
+        time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"\n-- RECV -- {time}\n")
+        await copy(data[:-1])
+      except IncompleteReadError:
+        break
 
 
 async def cssh() -> None:
