@@ -11,7 +11,7 @@ from pathlib import Path
 from shutil import which
 from socket import AF_UNIX, SOCK_STREAM, socket
 from sys import argv, stderr, stdin
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 
 #################### ########### ####################
@@ -54,8 +54,34 @@ def local_copy(data: bytes) -> None:
     fd.write(data)
 
 
-async def cp(data: bytes) -> None:
+def is_remote() -> bool:
+  if environ.get("SSH_TTY"):
+    return True
+  elif isfile(join("/", ".dockerenv")):
+    return True
+  else:
+    return False
+
+
+async def rcp(data: bytes) -> None:
+  try:
+    conn = await open_unix_connection(__socket_path__)
+  except:
+    pass
+  else:
+    _, writer = conn
+    writer.write(data)
+    writer.write(b'\0')
+    await writer.drain()
+
+
+async def copy(data: Optional[bytes] = None) -> None:
+  data: bytes = data or stdin.read().strip("\n").encode()
   tasks = []
+
+  if is_remote():
+    tasks.append(rcp(data))
+
   if environ.get("TMUX"):
     tasks.append(call("tmux", "load-buffer", "-", input=data))
 
@@ -72,40 +98,6 @@ async def cp(data: bytes) -> None:
     local_copy(data)
 
   await gather(*tasks)
-
-
-async def rcp(data: bytes) -> None:
-  try:
-    conn = await open_unix_connection(__socket_path__)
-  except:
-    pass
-  else:
-    _, writer = conn
-    writer.write(data)
-    writer.write(b'\0')
-    await writer.drain()
-
-
-def is_remote() -> bool:
-  if environ.get("SSH_TTY"):
-    return True
-  elif isfile(join("/", ".dockerenv")):
-    return True
-  else:
-    return False
-
-
-async def cp_data(data: bytes) -> None:
-  tasks = []
-  tasks.append(cp(data))
-  if is_remote():
-    tasks.append(rcp(data))
-  await gather(*tasks)
-
-
-async def copy() -> None:
-  data: bytes = stdin.read().strip("\n").encode()
-  await cp_data(data)
 
 
 #################### ############ ####################
@@ -181,7 +173,7 @@ async def cssh_run(args: List[str]) -> None:
       data: bytes = await proc.stdout.readuntil(b'\0')
       time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
       print(f"\n-- RECV -- {time}\n")
-      await cp_data(data[:-1])
+      await copy(data[:-1])
 
 
 async def cssh() -> None:
@@ -251,3 +243,4 @@ except KeyboardInterrupt:
   exit(130)
 finally:
   loop.close()
+
