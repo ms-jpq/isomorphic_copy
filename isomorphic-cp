@@ -73,20 +73,11 @@ async def cp(data: bytes) -> None:
 
 
 async def rcp(data: bytes) -> None:
-  from socket import socket, AF_UNIX, SOCK_STREAM
-  with socket(AF_UNIX, SOCK_STREAM) as sock:
-    try:
-      sock.connect(__socket_path__)
-    except OSError:
-      pass
-    else:
-      sock.sendall(data)
-      sock.sendall(b'\0')
-  # _, writer = await open_unix_connection(__socket_path__)
-  # writer.write(data)
-  # writer.write(b'\0')
-  # writer.close()
-  # await gather(writer.drain(), writer.wait_closed())
+  _, writer = await open_unix_connection(__socket_path__)
+  writer.write(data)
+  writer.write(b'\0')
+  writer.close()
+  await gather(writer.drain(), writer.wait_closed())
 
 
 def is_remote() -> bool:
