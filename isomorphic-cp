@@ -2,6 +2,7 @@
 
 from asyncio import (StreamReader, StreamWriter, gather, get_event_loop,
                      open_unix_connection, sleep, start_unix_server)
+from asyncio.events import AbstractServer
 from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
 from os import chmod, environ, getcwd, makedirs, unlink
 from os.path import basename, dirname, isfile, join, relpath
@@ -192,7 +193,8 @@ async def csshd() -> None:
   async def callback(reader: StreamReader, _: StreamWriter) -> None:
     data: bytes = await reader.read()
     print(data.decode(), end="", flush=True)
-  server = await start_unix_server(callback, __socket_path__)
+  server: AbstractServer = await start_unix_server(callback, __socket_path__)
+  await server.serve_forever()
 
 
 #################### ########### ####################
