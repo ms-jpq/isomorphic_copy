@@ -4,7 +4,7 @@
 
 Works the same locally as over SSH, inside Docker containers, et al.
 
-It even works inside Docker over SSH and then inside Docker!, infinitely chainable.
+It even works *inside Docker over SSH and then inside Docker!*, infinitely chainable.
 
 Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
 
