@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        target
+        target:
           - gui
           - nogui
     runs-on: ubuntu-latest
