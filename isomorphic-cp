@@ -88,10 +88,11 @@ def is_remote() -> bool:
 
 
 async def cp_data(data: bytes) -> None:
-  task = cp(data)
+  tasks = []
+  tasks.append(cp(data))
   if is_remote():
-    rcp(data)
-  await task
+    tasks.append(rcp(data))
+  await gather(*tasks)
 
 
 async def copy() -> None:
@@ -170,8 +171,8 @@ async def cssh_run(args: List[str]) -> None:
       print(err, file=stderr)
       return
 
-    data: bytes = await proc.stdout.readuntil(b'\0')
-    await cp_data(data[:-1])
+      data: bytes = await proc.stdout.readuntil(b'\0')
+      await cp_data(data[:-1])
 
 
 async def cssh() -> None:
