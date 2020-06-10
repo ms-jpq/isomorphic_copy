@@ -192,7 +192,6 @@ async def csshd() -> None:
     data: bytes = await reader.read()
     with open(stdout.fileno(), "wb") as fd:
       fd.write(data)
-      fd.write(b'\0')
       fd.flush()
   server: AbstractServer = await start_unix_server(callback, __socket_path__)
   await server.serve_forever()
