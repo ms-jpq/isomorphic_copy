@@ -4,6 +4,7 @@ from asyncio import (StreamReader, StreamWriter, gather, get_event_loop,
                      open_unix_connection, sleep, start_unix_server)
 from asyncio.events import AbstractServer
 from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
+from datetime import datetime
 from os import chmod, environ, getcwd, makedirs, unlink
 from os.path import basename, dirname, isfile, join, relpath
 from pathlib import Path
@@ -176,6 +177,7 @@ async def cssh_run(args: List[str]) -> None:
       print(f"daemon exited - {code}", file=stderr)
       return
 
+      print(f"\n-- RECV -- {datetime.now()}\n")
       data: bytes = await proc.stdout.readuntil(b'\0')
       await cp_data(data[:-1])
 
@@ -195,7 +197,7 @@ async def cssh() -> None:
 async def csshd() -> None:
   async def handler(reader: StreamReader, _: StreamWriter) -> None:
     data: bytes = await reader.read()
-    print(data[:-1].decode(), end="\0", flush=True)
+    print(data.decode(), end="", flush=True)
 
   server: AbstractServer = await start_unix_server(handler, __socket_path__)
   await server.serve_forever()
