@@ -195,7 +195,7 @@ async def cssh() -> None:
 async def csshd() -> None:
   async def handler(reader: StreamReader, _: StreamWriter) -> None:
     data: bytes = await reader.read()
-    print(data[:-1].decode(), end="", flush=True)
+    print(data.decode(), end="", flush=True)
 
   server: AbstractServer = await start_unix_server(handler, __socket_path__)
   await server.serve_forever()
