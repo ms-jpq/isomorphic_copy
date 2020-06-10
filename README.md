@@ -84,7 +84,7 @@ endif
 
 Most CLI applications will work out of the box. (such as lazygit, for example).
 
-If not, check if they require some environmental variables like Vim.
+If not, check if they require `DISPLAY` like Vim.
 
 ### Fallback
 
