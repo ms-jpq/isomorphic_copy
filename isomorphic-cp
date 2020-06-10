@@ -73,11 +73,15 @@ async def cp(data: bytes) -> None:
 
 
 async def rcp(data: bytes) -> None:
-  _, writer = await open_unix_connection(__socket_path__)
-  writer.write(data)
-  writer.write(b'\0')
-  writer.close()
-  await gather(writer.drain(), writer.wait_closed())
+  try:
+    conn = await open_unix_connection(__socket_path__)
+  except:
+    pass
+  else:
+    _, writer = conn
+    writer.write(data)
+    writer.write(b'\0')
+    await writer.drain()
 
 
 def is_remote() -> bool:
@@ -189,11 +193,9 @@ async def cssh() -> None:
 
 
 async def csshd() -> None:
-  async def handler(reader: StreamReader, writer: StreamWriter) -> None:
-    writer.close()
+  async def handler(reader: StreamReader, _: StreamWriter) -> None:
     data: bytes = await reader.read()
     print(data[:-1].decode(), end="", flush=True)
-    await writer.wait_closed()
 
   server: AbstractServer = await start_unix_server(handler, __socket_path__)
   await server.serve_forever()
