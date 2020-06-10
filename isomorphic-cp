@@ -13,6 +13,7 @@ from socket import AF_UNIX, SOCK_STREAM, socket
 from sys import argv, stderr, stdin
 from typing import List, Tuple
 
+
 #################### ########### ####################
 #################### INIT Region ####################
 #################### ########### ####################
@@ -115,7 +116,7 @@ async def copy() -> None:
 def local_paste() -> None:
   try:
     with open(__write_path__, "r") as fd:
-      print(fd.read(), end="")
+      print(fd.read(), end="", flush=True)
   except OSError:
     pass
 
@@ -186,7 +187,7 @@ async def cssh_run(args: List[str]) -> None:
 async def cssh() -> None:
   while True:
     await cssh_run(__args__)
-    print("\a")
+    print("\a", end="")
     await sleep(1)
 
 
