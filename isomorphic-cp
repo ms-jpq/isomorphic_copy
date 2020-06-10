@@ -55,20 +55,16 @@ def local_copy(data: bytes) -> None:
 async def cp(data: bytes) -> None:
   tasks = []
   if environ.get("TMUX"):
-    task = call("tmux", "load-buffer", "-", input=data)
-    tasks.append(task)
+    tasks.append(call("tmux", "load-buffer", "-", input=data))
 
   if which("pbcopy"):
-    task = call("pbcopy", input=data)
-    tasks.append(task)
+    tasks.append(call("pbcopy", input=data))
 
   elif environ.get("WAYLAND_DISPLAY") and which("wl-copy"):
-    task = call("wl-copy", input=data)
-    tasks.append(task)
+    tasks.append(call("wl-copy", input=data))
 
   elif environ.get("DISPLAY") and which("xclip"):
-    task = call("xclip", input=data)
-    tasks.append(task)
+    tasks.append(call("xclip", input=data))
 
   elif __local_write__:
     local_copy(data)
