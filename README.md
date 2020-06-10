@@ -14,7 +14,7 @@ Works out of the box with programs that use those commands.
 
 ## How to use
 
-Clone this repo to the same location on two machines. Either relative to `~` or `/`.
+**Clone** this repo to the same location on two machines. Either relative to `~` or `/`.
 
 **Prepend** `isomorphic-copy/bin` to your `PATH` for example:
 
@@ -22,7 +22,7 @@ Clone this repo to the same location on two machines. Either relative to `~` or 
 
 --
 
-**Automatically** applications that use `xclip`, `pcopy` and so forth will use isomorphic copy.
+**Automatically** most applications that use `xclip`, `pcopy` and so forth will use isomorphic copy.
 
 --
 
