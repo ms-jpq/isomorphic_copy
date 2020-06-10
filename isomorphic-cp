@@ -163,11 +163,12 @@ async def cssh_run(args: List[str]) -> None:
   proc: Process = await create_subprocess_exec(
       *exe, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
 
+  print(" ".join(exe))
   while True:
     code = proc.returncode
     if code:
       err = proc.stderr.read().decode()
-      print(f"{' '.join(exe)}\ndaemon exited - {code}", file=stderr)
+      print(f"daemon exited - {code}", file=stderr)
       print(err, file=stderr)
       return
 
@@ -187,18 +188,11 @@ async def cssh() -> None:
 #################### ############ ####################
 
 
-def ready_socket(path: str) -> None:
-  try:
-    unlink(path)
-  except IOError:
-    pass
-
-
-def csshd() -> None:
+async def csshd() -> None:
   async def callback(reader: StreamReader, _: StreamWriter) -> None:
     data: bytes = await reader.read()
     print(data.decode(), end="", flush=True)
-  start_unix_server(callback, __socket_path__)
+  server = await start_unix_server(callback, __socket_path__)
 
 
 #################### ########### ####################
@@ -230,7 +224,7 @@ async def main() -> None:
   if __name__ in {"cssh", "cdocker"}:
     await cssh()
   elif __name__ == "csshd":
-    csshd()
+    await csshd()
   elif is_paste():
     await paste()
   elif is_copy():
