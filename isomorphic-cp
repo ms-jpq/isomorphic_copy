@@ -177,9 +177,10 @@ async def cssh_run(args: List[str]) -> None:
       print(f"daemon exited - {code}", file=stderr)
       return
 
-      print(f"\n-- RECV -- {datetime.now()}\n")
-      data: bytes = await proc.stdout.readuntil(b'\0')
-      await cp_data(data[:-1])
+    data: bytes = await proc.stdout.readuntil(b'\0')
+    time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"\n-- RECV -- {time}\n")
+    await cp_data(data[:-1])
 
 
 async def cssh() -> None:
