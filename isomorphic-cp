@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from asyncio import gather, get_event_loop
-from asyncio.subprocess import create_subprocess_exec, DEVNULL, PIPE, Process
+from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
 from os import chmod, environ, getcwd, makedirs, unlink
 from os.path import basename, dirname, isfile, join, relpath
 from shutil import which
@@ -168,38 +168,30 @@ def cssh_prog() -> str:
     return canonical
 
 
-def cssh_run(args: List[str]) -> None:
+async def cssh_run(args: List[str]) -> None:
   prev, post = cssh_cmd()
   prog = cssh_prog()
   exe = [*prev, *args, *post, "sh", "-c", f'"{prog}"']
-  process: Popen = Popen(exe, stdout=PIPE, stderr=PIPE)
-  buf = bytearray()
+  proc: Process = await create_subprocess_exec(
+      *exe, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
 
   while True:
-    code = process.poll()
+    code = proc.returncode
     if code:
+      err = proc.stderr.read().decode()
       print(f"{' '.join(exe)}\ndaemon exited - {code}", file=stderr)
-      print(process.stderr.read().decode(), file=stderr)
+      print(err, file=stderr)
       return
 
-    line: bytes = process.stdout.readline()
-    for b in line:
-      if b == 0:
-        try:
-          cp_data(buf)
-        except ProcErr:
-          pass
-        buf.clear()
-        break
-      else:
-        buf.append(b)
+    data: bytes = await proc.stdout.readuntil(b'\0')
+    await cp_data(data)
 
 
-def cssh() -> None:
+async def cssh() -> None:
   while True:
-    cssh_run(__args__)
-    sleep(1)
+    await cssh_run(__args__)
     print("\a")
+    sleep(1)
 
 
 #################### ############ ####################
@@ -254,7 +246,7 @@ async def main() -> None:
   path_mask()
 
   if __name__ in {"cssh", "cdocker"}:
-    cssh()
+    await cssh()
   elif __name__ == "csshd":
     csshd()
   elif is_paste():
