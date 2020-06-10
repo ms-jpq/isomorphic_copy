@@ -10,6 +10,8 @@ Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriat
 
 Works out of the box with programs that use those commands.
 
+---
+
 ## How to use
 
 Clone this repo to the same location on two machines. Either relative to `~` or `/`.
