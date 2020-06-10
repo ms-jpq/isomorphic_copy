@@ -74,8 +74,8 @@ async def cp(data: bytes) -> None:
 
 async def rcp(data: bytes) -> None:
   _, writer = await open_unix_connection(__socket_path__)
-  writer.write(data)
-  writer.write(b'\0')
+  writer.write(data.encode())
+  writer.write("\0".encode())
   writer.close()
   await gather(writer.drain(), writer.wait_closed())
 
