@@ -18,13 +18,13 @@ Clone this repo to the same location on two machines. Either relative to `~` or 
 
 `export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in your `bash/zshrc` file.
 
----
+--
 
 **Automatically** applications that use `xclip`, `pcopy` and so forth will use isomorphic copy.
 
----
+--
 
-I added two convenience functions:
+I added two **convenience functions**:
 
 You don't have to use these. Things like `pbcopy` and `pbpaste` will continue to work.
 
@@ -33,9 +33,9 @@ You don't have to use these. Things like `pbcopy` and `pbpaste` will continue to
 
 `p > my_message.txt` :: Use `p` to paste from system clipboard
 
----
+--
 
-Launch remote daemon with one of
+Launch **remote daemon** with one of
 
 `cssh <ssh-args>`
 
