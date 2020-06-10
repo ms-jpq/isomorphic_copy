@@ -192,7 +192,7 @@ async def csshd() -> None:
   async def handler(reader: StreamReader, writer: StreamWriter) -> None:
     writer.close()
     data: bytes = await reader.read()
-    print(data[-1].decode(), end="", flush=True)
+    print(data[:-1].decode(), end="", flush=True)
     await writer.wait_closed()
 
   server: AbstractServer = await start_unix_server(handler, __socket_path__)
