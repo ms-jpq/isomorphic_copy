@@ -190,9 +190,10 @@ async def cssh() -> None:
 async def csshd() -> None:
   async def callback(reader: StreamReader, _: StreamWriter) -> None:
     data: bytes = await reader.read()
-    stdout.write(data)
-    stdout.write(b'\0')
-    stdout.flush()
+    with open(stdout.fileno(), "wb") as fd:
+      fd.write(data)
+      fd.write(b'\0')
+      fd.flush()
   server: AbstractServer = await start_unix_server(callback, __socket_path__)
   await server.serve_forever()
 
