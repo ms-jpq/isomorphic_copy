@@ -74,7 +74,7 @@ async def cp(data: bytes) -> None:
 
 async def rcp(data: bytes) -> None:
   with socket(AF_UNIX, SOCK_STREAM) as sock:
-    _, writer = await open_unix_connection(__socket_path__, sock=sock)
+    _, writer = await open_unix_connection(sock=sock)
     writer.write(data)
     writer.write(b'\0')
     writer.close()
@@ -196,7 +196,7 @@ async def csshd() -> None:
     print(data[:-1].decode(), end="", flush=True)
     await writer.wait_closed()
   with socket(AF_UNIX, SOCK_STREAM) as sock:
-    server: AbstractServer = await start_unix_server(handler, __socket_path__, sock=sock)
+    server: AbstractServer = await start_unix_server(handler, sock=sock)
     await server.serve_forever()
 
 
