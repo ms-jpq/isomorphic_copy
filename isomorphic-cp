@@ -122,7 +122,7 @@ async def paste() -> None:
 
   elif environ.get("DISPLAY") and which("xclip"):
     args = (
-        *__args__, "-out") if set(__args__).isdisjoint({"-o", "--out"}) else __args__
+        *__args__, "-out") if set(__args__).isdisjoint({"-o", "-out"}) else __args__
     await call("xclip", *args)
 
   elif environ.get("TMUX"):
