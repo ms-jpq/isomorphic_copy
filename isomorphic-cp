@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
-from asyncio import gather, get_event_loop
+from asyncio import (StreamReader, StreamWriter, gather, get_event_loop,
+                     open_unix_connection, sleep, start_unix_server)
 from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
 from os import chmod, environ, getcwd, makedirs, unlink
 from os.path import basename, dirname, isfile, join, relpath
 from pathlib import Path
 from shutil import which
-from socket import AF_UNIX, SOCK_STREAM, socket
-from socketserver import BaseRequestHandler, UnixStreamServer
 from sys import argv, stderr, stdin, stdout
-from time import sleep
 from typing import List, Tuple
 
 
@@ -73,15 +71,11 @@ async def cp(data: bytes) -> None:
   await gather(*tasks)
 
 
-def rcp(data: bytes) -> None:
-  with socket(AF_UNIX, SOCK_STREAM) as sock:
-    try:
-      sock.connect(__socket_path__)
-    except OSError:
-      pass
-    else:
-      sock.sendall(data)
-      sock.sendall(b'\0')
+async def rcp(data: bytes) -> None:
+  _, writer = await open_unix_connection(__socket_path__)
+  writer.write(data)
+  writer.write(b'\0')
+  await writer.drain()
 
 
 def is_remote() -> bool:
@@ -184,7 +178,7 @@ async def cssh() -> None:
   while True:
     await cssh_run(__args__)
     print("\a")
-    sleep(1)
+    await sleep(1)
 
 
 #################### ############ ####################
@@ -200,16 +194,10 @@ def ready_socket(path: str) -> None:
 
 
 def csshd() -> None:
-  class Handler(BaseRequestHandler):
-    def handle(self) -> None:
-      with self.request.makefile() as fd:
-        data: str = fd.read()
-        stdout.write(data)
-        stdout.flush()
-
-  ready_socket(__socket_path__)
-  with UnixStreamServer(__socket_path__, Handler) as srv:
-    srv.serve_forever()
+  async def callback(reader: StreamReader, _: StreamWriter) -> None:
+    data: bytes = await reader.read()
+    print(data.decode(), end="", flush=True)
+  start_unix_server(callback, __socket_path__)
 
 
 #################### ########### ####################
