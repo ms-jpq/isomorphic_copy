@@ -13,6 +13,11 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        target
+          - gui
+          - nogui
     runs-on: ubuntu-latest
 
     steps:
@@ -25,5 +30,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ secrets.DOCKER_USERNAME }}/isomorphic-copy
-          tags: latest
+          tags: ${{ matrix.target }}
+          Dockerfile: docker/${{ matrix.target }}/Dockerfile
 
