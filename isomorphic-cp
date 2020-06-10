@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+from asyncio import gather, get_event_loop
+from asyncio.subprocess import create_subprocess_exec, DEVNULL, PIPE, Process
 from os import chmod, environ, getcwd, makedirs, unlink
 from os.path import basename, dirname, isfile, join, relpath
 from shutil import which
 from socket import AF_UNIX, SOCK_STREAM, socket
 from socketserver import BaseRequestHandler, UnixStreamServer
-from subprocess import PIPE, Popen, run
 from sys import argv, stderr, stdin, stdout
 from time import sleep
 from typing import List, Tuple
@@ -34,13 +35,16 @@ def path_mask() -> None:
 
 
 class ProcErr(BaseException):
-  pass
+  def __init__(self, message: str):
+    self.message = message
 
 
-def call(prog: str, *args: List[str], input: bytes = None) -> None:
-  ret = run([prog, *args], input=input)
-  if ret.returncode != 0:
-    raise ProcErr()
+async def call(prog: str, *args: List[str], input: bytes = None) -> None:
+  proc: Process = await create_subprocess_exec(
+      prog, *args, stdin=PIPE, stderr=PIPE)
+  _, stderr = await proc.communicate(input)
+  if proc.returncode != 0:
+    raise ProcErr(stderr.decode())
 
 
 #################### ########### ####################
@@ -53,21 +57,28 @@ def local_copy(data: bytes) -> None:
     fd.write(data)
 
 
-def cp(data: bytes) -> None:
+async def cp(data: bytes) -> None:
+  tasks = []
   if environ.get("TMUX"):
-    call("tmux", "load-buffer", "-", input=data)
+    task = call("tmux", "load-buffer", "-", input=data)
+    tasks.append(task)
 
   if which("pbcopy"):
-    call("pbcopy", input=data)
+    task = call("pbcopy", input=data)
+    tasks.append(task)
 
   elif environ.get("WAYLAND_DISPLAY") and which("wl-copy"):
-    call("wl-copy", input=data)
+    task = call("wl-copy", input=data)
+    tasks.append(task)
 
   elif environ.get("DISPLAY") and which("xclip"):
-    call("xclip", input=data)
+    task = call("xclip", input=data)
+    tasks.append(task)
 
   elif __local_write__:
     local_copy(data)
+
+  await gather(*tasks)
 
 
 def rcp(data: bytes) -> None:
@@ -89,15 +100,16 @@ def is_remote() -> bool:
     return False
 
 
-def cp_data(data: bytes) -> None:
-  cp(data)
+async def cp_data(data: bytes) -> None:
+  task = cp(data)
   if is_remote():
     rcp(data)
+  await task
 
 
-def copy() -> None:
+async def copy() -> None:
   data: bytes = stdin.read().strip("\n").encode()
-  cp_data(data)
+  await cp_data(data)
 
 
 #################### ############ ####################
@@ -113,18 +125,18 @@ def local_paste() -> None:
     pass
 
 
-def paste() -> None:
+async def paste() -> None:
   if which("pbpaste"):
-    call("pbpaste")
+    await call("pbpaste")
 
   elif environ.get("WAYLAND_DISPLAY") and which("wl-paste"):
-    call("wl-paste")
+    await call("wl-paste")
 
   elif environ.get("DISPLAY") and which("xclip"):
-    call("xclip", "-out")
+    await call("xclip", "-out")
 
   elif environ.get("TMUX"):
-    call("tmux", "save-buffer", "-")
+    await call("tmux", "save-buffer", "-")
 
   elif __local_write__:
     local_paste()
@@ -238,7 +250,7 @@ def is_paste() -> bool:
     return False
 
 
-def main() -> None:
+async def main() -> None:
   path_mask()
 
   if __name__ in {"cssh", "cdocker"}:
@@ -246,16 +258,18 @@ def main() -> None:
   elif __name__ == "csshd":
     csshd()
   elif is_paste():
-    paste()
+    await paste()
   elif is_copy():
-    copy()
+    await copy()
   else:
     print(f"Unknown -- {__name__} {' '.join(__args__)}", file=stderr)
     exit(1)
 
 
 try:
-  main()
+  loop = get_event_loop()
+  loop.run_until_complete(main())
 except KeyboardInterrupt:
   pass
-
+finally:
+  loop.close()
