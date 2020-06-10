@@ -262,6 +262,6 @@ try:
   loop = get_event_loop()
   loop.run_until_complete(main())
 except KeyboardInterrupt:
-  pass
+  exit(130)
 finally:
   loop.close()
