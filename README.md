@@ -2,7 +2,7 @@
 
 Cross platform clipboard.
 
-Works the same locally as over SSH, inside Docker containers, etc.
+Works the same locally as over SSH, inside Docker containers, et al.
 
 Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
 
@@ -17,6 +17,14 @@ Clone this repo to the same location on two machines. Either relative to `~` or 
 `export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in your `bash/zshrc` file.
 
 ---
+
+Automatically applications that use `xclip`, `pcopy` and so forth will use isomorphic copy.
+
+---
+
+I added two convenience functions:
+
+You don't have to use these. Things like `pbcopy` and `pbpaste` will continue to work.
 
 `echo <my message> | c` :: Use `c` to copy to system clipboard
 
