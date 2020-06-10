@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from asyncio import (StreamReader, StreamWriter, gather, get_event_loop,
-                     open_unix_connection, sleep, start_unix_server)
+from asyncio import (IncompleteReadError, StreamReader, StreamWriter, gather,
+                     get_event_loop, open_unix_connection, sleep,
+                     start_unix_server)
 from asyncio.events import AbstractServer
-from asyncio.streams import IncompleteReadError
 from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
 from datetime import datetime
 from os import chmod, environ, getcwd, makedirs, unlink
@@ -248,4 +248,3 @@ except KeyboardInterrupt:
   exit(130)
 finally:
   loop.close()
-
