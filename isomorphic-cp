@@ -173,11 +173,12 @@ async def cssh_run(args: List[str]) -> None:
     else:
       try:
         data: bytes = await proc.stdout.readuntil(b'\0')
+      except IncompleteReadError:
+        break
+      else:
         time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"\n-- RECV -- {time}\n")
         await copy(data[:-1])
-      except IncompleteReadError:
-        break
 
 
 async def cssh() -> None:
