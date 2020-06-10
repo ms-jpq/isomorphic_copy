@@ -57,6 +57,17 @@ If daemon is run under tmux, copy will also propagate to the local tmux clipboar
 
 If no system clipboard is available, copy / paste will use tmux clipboard.
 
+Copying *FROM* tmux will require this snippet.
+
+```conf
+bind -T copy-mode MouseDown1Pane \
+  select-pane \;\
+  send-keys -X copy-pipe "c" \;\
+  send-keys -X clear-selection
+```
+
+Replace `copy-mode` with `copy-mode-vi` if you are using vi emulation.
+
 ### Vim
 
 Vim will only use `xclip` if the x11 environmental variable `DISPLAY` is set.
