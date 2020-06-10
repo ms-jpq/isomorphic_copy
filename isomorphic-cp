@@ -162,15 +162,13 @@ async def cssh_run(args: List[str]) -> None:
   prog = cssh_prog()
   exe = [*prev, *args, *post, "sh", "-c", prog]
   proc: Process = await create_subprocess_exec(
-      *exe, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
+      *exe, stdin=DEVNULL, stdout=PIPE)
 
   print(" ".join(exe))
   while True:
     code = proc.returncode
     if code:
-      err = proc.stderr.read().decode()
       print(f"daemon exited - {code}", file=stderr)
-      print(err, file=stderr)
       return
 
       data: bytes = await proc.stdout.readuntil(b'\0')
