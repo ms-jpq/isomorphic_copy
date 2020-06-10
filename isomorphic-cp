@@ -130,7 +130,7 @@ async def paste() -> None:
     local_paste()
 
   else:
-    print("⚠️ No system clipboard detected ⚠️\nSet ISOCP_USE_FILE=1 to use temp file", file=stderr)
+    print("⚠️ No system clipboard detected ⚠️\n\nexport ISOCP_USE_FILE=1 to use temp file", file=stderr)
     exit(1)
 
 
