@@ -257,5 +257,5 @@ def main() -> None:
 try:
   main()
 except KeyboardInterrupt:
-  exit()
+  pass
 
