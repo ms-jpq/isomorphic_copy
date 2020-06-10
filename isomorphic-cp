@@ -34,17 +34,12 @@ def path_mask() -> None:
   environ["PATH"] = ":".join(paths)
 
 
-class ProcErr(BaseException):
-  def __init__(self, message: str):
-    self.message = message
-
-
 async def call(prog: str, *args: List[str], input: bytes = None) -> None:
   proc: Process = await create_subprocess_exec(
-      prog, *args, stdin=PIPE, stderr=PIPE)
-  _, stderr = await proc.communicate(input)
+      prog, *args, stdin=PIPE)
+  await proc.communicate(input)
   if proc.returncode != 0:
-    raise ProcErr(stderr.decode())
+    exit(proc.returncode)
 
 
 #################### ########### ####################
