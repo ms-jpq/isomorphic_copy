@@ -120,7 +120,7 @@ async def copy() -> None:
 def local_paste() -> None:
   try:
     with open(__write_path__, "r") as fd:
-      print(fd.read())
+      print(fd.read(), end="")
   except OSError:
     pass
 
