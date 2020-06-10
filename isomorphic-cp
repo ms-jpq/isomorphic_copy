@@ -4,6 +4,7 @@ from asyncio import gather, get_event_loop
 from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
 from os import chmod, environ, getcwd, makedirs, unlink
 from os.path import basename, dirname, isfile, join, relpath
+from pathlib import Path
 from shutil import which
 from socket import AF_UNIX, SOCK_STREAM, socket
 from socketserver import BaseRequestHandler, UnixStreamServer
@@ -150,7 +151,7 @@ def cssh_cmd() -> Tuple[List[str], List[str]]:
 
 
 def cssh_prog() -> str:
-  home = environ["HOME"]
+  home = str(Path.home())
   canonical = join(__bin__, "csshd")
 
   if canonical.startswith(home):
