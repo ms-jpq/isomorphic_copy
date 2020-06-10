@@ -81,7 +81,7 @@ async def rcp(data: bytes) -> None:
 def is_remote() -> bool:
   if environ.get("SSH_TTY"):
     return True
-  elif isfile("/.dockerenv"):
+  elif isfile(join("/", ".dockerenv")):
     return True
   else:
     return False
