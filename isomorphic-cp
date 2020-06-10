@@ -177,6 +177,7 @@ async def cssh_run(args: List[str]) -> None:
       return
 
     data: bytes = await proc.stdout.readuntil(b'\0')
+    del data[-1]
     await cp_data(data)
 
 
