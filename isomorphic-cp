@@ -74,8 +74,8 @@ async def cp(data: bytes) -> None:
 
 async def rcp(data: bytes) -> None:
   _, writer = await open_unix_connection(__socket_path__)
-  writer.write(data.encode())
-  writer.write("\0".encode())
+  writer.write(data)
+  writer.write(b'\0')
   writer.close()
   await gather(writer.drain(), writer.wait_closed())
 
@@ -189,7 +189,7 @@ async def cssh() -> None:
 
 
 async def csshd() -> None:
-  async def callback(reader: StreamReader, writer: StreamWriter) -> None:
+  async def handler(reader: StreamReader, writer: StreamWriter) -> None:
     writer.close()
     data: bytes = await reader.read()
     with open(stdout.fileno(), "wb") as fd:
@@ -197,7 +197,7 @@ async def csshd() -> None:
       fd.flush()
     await writer.wait_closed()
 
-  server: AbstractServer = await start_unix_server(callback, __socket_path__)
+  server: AbstractServer = await start_unix_server(handler, __socket_path__)
   await server.serve_forever()
 
 
