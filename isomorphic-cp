@@ -86,7 +86,7 @@ def rcp(data: bytes) -> None:
     try:
       sock.connect(__socket_path__)
       sock.sendall(data)
-      sock.sendall(b'\0\n')
+      sock.sendall(b'\0')
     except OSError:
       pass
 
@@ -171,7 +171,7 @@ def cssh_prog() -> str:
 async def cssh_run(args: List[str]) -> None:
   prev, post = cssh_cmd()
   prog = cssh_prog()
-  exe = [*prev, *args, *post, "sh", "-c", f'"{prog}"']
+  exe = [*prev, *args, *post, "sh", "-c", prog]
   proc: Process = await create_subprocess_exec(
       *exe, stdin=DEVNULL, stdout=PIPE, stderr=PIPE)
 
