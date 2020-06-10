@@ -10,7 +10,6 @@ from os import chmod, environ, getcwd, makedirs, unlink
 from os.path import basename, dirname, isfile, join, relpath
 from pathlib import Path
 from shutil import which
-from socket import AF_UNIX, SOCK_STREAM, socket
 from sys import argv, stderr, stdin
 from typing import List, Optional, Tuple
 

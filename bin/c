@@ -19,4 +19,3 @@ then
 else
   /usr/bin/env -S python3 "$iso_cp" "$prog" "$@"
 fi
-
