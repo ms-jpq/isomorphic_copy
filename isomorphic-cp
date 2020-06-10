@@ -121,7 +121,9 @@ async def paste() -> None:
     await call("wl-paste")
 
   elif environ.get("DISPLAY") and which("xclip"):
-    await call("xclip", *__args__)
+    args = (
+        *args, "-out") if set(__args__).isdisjoint({"-o", "--out"}) else __args__
+    await call("xclip", *args)
 
   elif environ.get("TMUX"):
     await call("tmux", "save-buffer", "-")
