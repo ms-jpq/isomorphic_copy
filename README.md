@@ -68,7 +68,7 @@ Copying *FROM* tmux will require this snippet.
 ```conf
 set -g mouse on
 
-bind -T copy-mode-vi MouseDragEnd1Pane \
+bind -T copy-mode MouseDragEnd1Pane \
   send-keys -X stop-selection
 
 bind -T copy-mode MouseDown1Pane \
@@ -76,6 +76,8 @@ bind -T copy-mode MouseDown1Pane \
   send-keys -X copy-pipe "c" \;\
   send-keys -X clear-selection
 ```
+
+Drag to select, click in dragged area to copy.
 
 Replace `copy-mode` with `copy-mode-vi` if you are using vi emulation.
 
