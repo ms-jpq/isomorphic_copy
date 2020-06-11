@@ -24,6 +24,7 @@ Requires `xclip` or `wl-clipboard` under GUI linux.
 
 `export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in your `bash/zshrc` file.
 
+You need to do this on both local and remote.
 --
 
 **Automatically** most applications that use `xclip`, `wl-clipboard`, `pbcopy` and so forth will use `isomorphic-copy` with zero setup.
