@@ -8,7 +8,7 @@ It even works inside Docker over SSH and then inside Docker!, **infinitely chain
 
 It will **pretend** it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
 
-Works out of the box with programs that use those commands.
+Works out of the 📦 with most programs that use those commands.
 
 ![clippy](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg)
 
