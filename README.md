@@ -100,10 +100,28 @@ It will write inside the git repo, put it somewhere safe.
 
 ## How does it work?
 
-`isomorphic-copy` will use the system & tmux clipboard if run locally. It will try to detect being ran remotely, by either `SSH_TTY` env var, or `.dockerenv` file, etc.
+### PATH
 
-If ran as a daemon, it will find a copy of itself on the remote machine on the same relative location, start itself on the remote, and listen on an unix socket created inside the git repo.
+`isomorphic-copy` inserts itself in the `PATH` before actual system clipboards. It will forward calls to system / tmux / remote clipboards.
 
-Remote copies then try to write to the unix socket, which will propagate via the two daemons back to your local machine.
+### Remote detection
 
-This works pretty much everywhere, because we are only using `stdin` and `stdout`.
+`isomorphic-copy` will use `SSH_TTY` env var and `.dockerenv` to detect remote sessions. If running under remote session, it will communicate with remote daemon via an UNIX socket.
+
+### Twin Daemons
+
+To communicate with remote, `isomorphic-copy` will launch a local daemon, which will then launch itself as a remote daemon.
+
+The two daemons communicate via stdout. It's so stupidly simple that it will work absolutely everywhere.
+
+Remote copy look something like this.
+
+```
+<third party app> | <fake xclip> | iso-cp > unix-socket ->
+
+unix-socket -> remote-daemon > /dev/stdout | local-daemon | <actual clipboard>
+```
+
+### Chaining
+
+Basically the same workflow above, repeated n times until finally you reach local clipboard.
