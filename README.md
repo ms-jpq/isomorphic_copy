@@ -6,9 +6,9 @@ Works the same locally as over SSH, inside Docker containers, et al.
 
 It even works inside Docker over SSH and then inside Docker!, **infinitely chainable**.
 
-Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
+It will **pretend** it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
 
-Works out of the box with programs that use those commands.
+Works out of the 📦 with most programs that use those commands.
 
 ![clippy](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg)
 
@@ -23,6 +23,8 @@ Requires `xclip` or `wl-clipboard` under GUI linux.
 **Prepend** `isomorphic-copy/bin` to your `PATH` for example:
 
 `export PATH="$XDG_CONFIG_HOME/isomorphic-copy/bin:$PATH"` in your `bash/zshrc` file.
+
+You need to do this on both local and remote.
 
 --
 
@@ -52,6 +54,19 @@ Launch **remote daemon** with one of
 Once daemon is launched, remote copy will propagate to local system clipboard.
 
 Remote applications that use `xclip`, `pbcopy`, `wl-copy` will propagate to local system clipboard.
+
+--
+
+**Local -> SSH -> Docker**
+
+If you have to copy inside a `Docker` container on a remote machine via `SSH`
+
+from local run `cssh <ssh-args>` to remote
+
+from remote run `cdocker <container name / sha>` to container
+
+And you are set!
+
 
 ## Integrations
 
