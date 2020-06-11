@@ -28,6 +28,8 @@ Requires `xclip` or `wl-clipboard` under GUI linux.
 
 **Automatically** most applications that use `xclip`, `clipboard`, `pbcopy` and so forth will use isomorphic copy.
 
+Works just like python `virtualenv`!
+
 --
 
 I added two **convenience functions**:
@@ -105,8 +107,3 @@ If ran as a daemon, it will find a copy of itself on the remote machine on the s
 Remote copies then try to write to the unix socket, which will propagate via the two daemons back to your local machine.
 
 This works pretty much everywhere, because we are only using `stdin` and `stdout`.
-
-## How does it masquerade as xclip?
-
-Think python virtual environment.
-
