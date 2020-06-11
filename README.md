@@ -10,9 +10,9 @@ Pretends it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriat
 
 Works out of the box with programs that use those commands.
 
----
-
 ![clippy](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg)
+
+---
 
 ## How to use
 
