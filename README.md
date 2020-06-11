@@ -81,6 +81,8 @@ Vim will only use `xclip` if the x11 environmental variable `DISPLAY` is set.
 Add this snippet to your `vimrc`, and Vim will automatically use the fake `xclip`.
 
 ```viml
+set clipboard=unnamedplus
+
 if getenv('DISPLAY') == v:null
   exe setenv('DISPLAY', 'FAKE')
 endif
