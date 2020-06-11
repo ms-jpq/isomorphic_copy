@@ -1,3 +1,4 @@
+se
 set clipboard=unnamedplus
 
 if getenv('DISPLAY') == v:null
