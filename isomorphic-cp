@@ -127,7 +127,7 @@ async def paste() -> None:
     args = (
         *__args__, "-out") if set(__args__).isdisjoint({"-o", "-out"}) else __args__
     await call("xclip", [*args, "-selection", "clipboard"])
-    await call("xclip", [*args, "-selection", "primary"])
+    # await call("xclip", [*args, "-selection", "primary"])
 
   elif environ.get("TMUX"):
     await call("tmux", "save-buffer", "-")
