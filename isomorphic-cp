@@ -92,8 +92,10 @@ async def copy(data: Optional[bytes] = None) -> None:
     tasks.append(call("wl-copy", input=data))
 
   elif environ.get("DISPLAY") and which("xclip"):
-    args = [*__args__, "-selection", "clipboard"]
-    tasks.append(call("xclip", *args, input=data))
+    tasks.append(
+        call("xclip", [*__args__, "-selection", "clipboard"], input=data))
+    tasks.append(
+        call("xclip", [*__args__, "-selection", "primary"], input=data))
 
   elif __local_write__:
     local_copy(data)
@@ -124,8 +126,8 @@ async def paste() -> None:
   elif environ.get("DISPLAY") and which("xclip"):
     args = (
         *__args__, "-out") if set(__args__).isdisjoint({"-o", "-out"}) else __args__
-    args = [*args, "-selection", "clipboard"]
-    await call("xclip", *args)
+    await call("xclip", [*args, "-selection", "clipboard"])
+    await call("xclip", [*args, "-selection", "primary"])
 
   elif environ.get("TMUX"):
     await call("tmux", "save-buffer", "-")
