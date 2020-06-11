@@ -26,7 +26,7 @@ Requires `xclip` or `wl-clipboard` under GUI linux.
 
 --
 
-**Automatically** most applications that use `xclip`, `clipboard`, `pbcopy` and so forth will use `isomorphic-copy` with zero setup.
+**Automatically** most applications that use `xclip`, `wl-clipboard`, `pbcopy` and so forth will use `isomorphic-copy` with zero setup.
 
 Works just like python `virtualenv`!
 
