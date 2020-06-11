@@ -1,4 +1,4 @@
-# Isomorphic Copy
+# [Isomorphic Copy](https://ms-jpq.github.io/isomorphic-copy)
 
 **Cross platform clipboard.**
 
