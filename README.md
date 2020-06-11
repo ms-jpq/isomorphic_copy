@@ -36,10 +36,10 @@ I added two **convenience functions**:
 
 You don't have to use these. Things like `pbcopy` and `pbpaste` will continue to work.
 
-`echo <my message> | c` :: Use `c` to copy to system clipboard
+`echo <my message> | c` Use `c` to copy to system clipboard
 
 
-`p > my_message.txt` :: Use `p` to paste from system clipboard
+`p > my_message.txt` Use `p` to paste from system clipboard
 
 --
 
