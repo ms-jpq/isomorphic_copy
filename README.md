@@ -117,7 +117,7 @@ The two daemons communicate via stdout. It's so stupidly simple that it will wor
 Remote copy look something like this.
 
 ```
-<third party app> | <fake xclip> | iso-cp > unix-socket ->
+<third party app> | fake xclip | isomorphic-copy > unix-socket ->
 
 unix-socket -> remote-daemon > /dev/stdout | local-daemon | <actual clipboard>
 ```
