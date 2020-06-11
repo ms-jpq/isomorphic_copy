@@ -12,10 +12,11 @@ iso_cp="$(dirname "$(dirname "$0")")/isomorphic-cp"
 
 if [ -x /usr/local/bin/python3 ]
 then
-  /usr/local/bin/python3  "$iso_cp" "$prog" "$@"
+  exec /usr/local/bin/python3  "$iso_cp" "$prog" "$@"
 elif [ -x /usr/bin/python3 ]
 then
-  /usr/bin/python3        "$iso_cp" "$prog" "$@"
+  exec /usr/bin/python3        "$iso_cp" "$prog" "$@"
 else
-  /usr/bin/env -S python3 "$iso_cp" "$prog" "$@"
+  exec /usr/bin/env -S python3 "$iso_cp" "$prog" "$@"
 fi
+
