@@ -2,7 +2,7 @@ FROM alpine:latest
 
 
 # Requirements
-RUN apk add --no-cache python3 && \
+RUN apk add --no-cache python3 tmux vim nvim && \
     export XDG_CONFIG_HOME="$HOME/.config" && \
     export XDG_DATA_HOME="$HOME/.local/share" && \
     mkdir -p "$XDG_CONFIG_HOME/isomorphic-copy" && \
@@ -10,6 +10,7 @@ RUN apk add --no-cache python3 && \
 
 
 # Install
+COPY docker/_root/ /
 COPY .    /root/.isomorphic-copy/
 COPY .    /root/.local/share/isomorphic-copy/
 COPY .    /root/.config/isomorphic-copy/
