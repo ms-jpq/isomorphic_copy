@@ -83,15 +83,20 @@ Replace `copy-mode` with `copy-mode-vi` if you are using vi emulation.
 
 ### Vim
 
-Vim will only use `xclip` if the x11 environmental variable `DISPLAY` is set.
+Neovim will only use `xclip` if the x11 environmental variable `DISPLAY` is set.
+
+Vim will require an autocmd event.
 
 Add this snippet to your `vimrc`, and Vim will automatically use the fake `xclip`.
 
 ```viml
-set clipboard=unnamedplus
-
-if getenv('DISPLAY') == v:null
-  exe setenv('DISPLAY', 'FAKE')
+if has('nvim')
+  set clipboard=unnamedplus,unnamed
+  if getenv('DISPLAY') == v:null
+    exe setenv('DISPLAY', 'FAKE')
+  endif
+else
+  autocmd TextYankPost * call system("c", getreg('"'))
 endif
 ```
 
@@ -99,7 +104,7 @@ endif
 
 Most CLI applications will work out of the box. (such as lazygit, for example).
 
-If not, check if they require `DISPLAY` like Vim.
+If not, check if they require `DISPLAY` like Neovim.
 
 ### Fallback
 
