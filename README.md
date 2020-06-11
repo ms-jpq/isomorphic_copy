@@ -26,7 +26,7 @@ Requires `xclip` or `wl-clipboard` under GUI linux.
 
 --
 
-**Automatically** most applications that use `xclip`, `pcopy` and so forth will use isomorphic copy.
+**Automatically** most applications that use `xclip`, `clipboard`, `pbcopy` and so forth will use isomorphic copy.
 
 --
 
