@@ -53,6 +53,17 @@ Once daemon is launched, remote copy will propagate to local system clipboard.
 
 Remote applications that use `xclip`, `pbcopy`, `wl-copy` will propagate to local system clipboard.
 
+--
+
+If you have to copy inside a `Docker` container on a remote machine via `SSH`
+
+from local run `cssh <ssh-args>` to remote
+
+from remote run `cdocker <container name / sha>` to container
+
+And you are set!
+
+
 ## Integrations
 
 ### Tmux
