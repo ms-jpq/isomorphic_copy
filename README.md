@@ -106,7 +106,7 @@ It will write inside the git repo, put it somewhere safe.
 
 ### Remote detection
 
-`isomorphic-copy` will use `SSH_TTY` env var and `.dockerenv` to detect remote sessions. If running under remote session, it will communicate with remote daemon via an UNIX socket.
+`isomorphic-copy` will use `SSH_TTY` env var and `/.dockerenv` file to detect remote sessions. If running under remote session, it will communicate with remote daemon via an UNIX socket.
 
 ### Twin Daemons
 
