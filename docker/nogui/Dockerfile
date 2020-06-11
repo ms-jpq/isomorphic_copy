@@ -2,7 +2,7 @@ FROM alpine:latest
 
 
 # Requirements
-RUN apk add --no-cache python3 tmux vim nvim && \
+RUN apk add --no-cache python3 tmux vim && \
     export XDG_CONFIG_HOME="$HOME/.config" && \
     export XDG_DATA_HOME="$HOME/.local/share" && \
     mkdir -p "$XDG_CONFIG_HOME/isomorphic-copy" && \
