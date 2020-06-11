@@ -12,6 +12,8 @@ Works out of the box with programs that use those commands.
 
 ---
 
+![clippy](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg)
+
 ## How to use
 
 **Clone** this repo to the same location on two machines. Either relative to `~` or `/`.
@@ -105,3 +107,4 @@ This works pretty much everywhere, because we are only using `stdin` and `stdout
 ## How does it masquerade as xclip?
 
 Think python virtual environment.
+

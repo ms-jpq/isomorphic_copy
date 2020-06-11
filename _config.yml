@@ -1,8 +1,11 @@
 
 title: Isomorphic Copy
 
-showcase: False
+showcase: True
 
 desc: >-
    Cross platform clipboard
-images: []
+
+images:
+  - https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg
+
