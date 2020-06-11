@@ -1,4 +1,4 @@
-se
+set mouse=a
 set clipboard=unnamedplus
 
 if getenv('DISPLAY') == v:null
