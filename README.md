@@ -66,6 +66,11 @@ If no system clipboard is available, copy / paste will use tmux clipboard.
 Copying *FROM* tmux will require this snippet.
 
 ```conf
+set -g mouse on
+
+bind -T copy-mode-vi MouseDragEnd1Pane \
+  send-keys -X stop-selection
+
 bind -T copy-mode MouseDown1Pane \
   select-pane \;\
   send-keys -X copy-pipe "c" \;\
@@ -127,3 +132,4 @@ unix-socket -> remote-daemon > /dev/stdout | local-daemon | <actual clipboard>
 ### Chaining
 
 Basically the same workflow above, repeated n times until finally you reach local clipboard.
+
