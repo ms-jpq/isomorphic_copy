@@ -87,7 +87,7 @@ Neovim will only use `xclip` if the x11 environmental variable `DISPLAY` is set.
 
 Vim will require an autocmd event.
 
-Add this snippet to your `vimrc`, and Vim will automatically use the fake `xclip`.
+Add this snippet to your `vimrc`, to work for both vims.
 
 ```viml
 if has('nvim')
