@@ -91,6 +91,7 @@ Add this snippet to your `vimrc`, and Vim will automatically use the fake `xclip
 
 ```viml
 if has('nvim')
+  " use unnamedplus only! or else will double set
   set clipboard=unnamedplus
   if getenv('DISPLAY') == v:null
     exe setenv('DISPLAY', 'FAKE')
