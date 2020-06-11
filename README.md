@@ -16,6 +16,8 @@ Works out of the box with programs that use those commands.
 
 ## How to use
 
+Requires `xclip` or `wl-clipboard` under GUI linux.
+
 **Clone** this repo to the same location on two machines. Either relative to `~` or `/`.
 
 **Prepend** `isomorphic-copy/bin` to your `PATH` for example:
