@@ -4,7 +4,7 @@
 
 **Both remote and local**
 
-Works out of the 📦 with most programs that use `pbcopy`, `xclip`, `wl-copy`, etc.
+**Works out of the 📦** with most programs that use `pbcopy`, `xclip`, `wl-copy`, etc.
 
 Works the same locally as over SSH, inside Docker containers, et al.
 
