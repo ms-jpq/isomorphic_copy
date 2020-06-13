@@ -16,6 +16,12 @@ Works out of the 📦 with most programs that use `pbcopy`, `xclip`, `wl-copy`, 
 
 ## Networkless
 
+`isomorphic-cp` communicates by `stdio`  and `unix socket` only!
+
+All it does is spawn subprocesses and listen to `IO`.
+
+This makes it amazingly versatile.
+
 ![diagram](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/diagram.png)
 
 ---
@@ -133,32 +139,3 @@ If not, check if they require `DISPLAY` like Neovim.
 If no system / tmux clipboard is found, setting environmental variable `ISOCP_USE_FILE=1` will enable using a temp file as a crude clipboard.
 
 It will write inside the git repo, put it somewhere safe.
-
-## How does it work?
-
-### PATH
-
-`isomorphic-copy` inserts itself in the `PATH` before actual system clipboards. It will forward calls to system / tmux / remote clipboards.
-
-### Remote detection
-
-`isomorphic-copy` will use `SSH_TTY` env var and `/.dockerenv` file to detect remote sessions. If running under remote session, it will communicate with remote daemon via an UNIX socket.
-
-### Twin Daemons
-
-To communicate with remote, `isomorphic-copy` will launch a local daemon, which will then launch itself as a remote daemon.
-
-The two daemons communicate via stdout. It's so stupidly simple that it will work absolutely everywhere.
-
-Remote copy look something like this.
-
-```
-<third party app> | fake xclip | isomorphic-copy > unix-socket ->
-
-unix-socket -> remote-daemon > /dev/stdout | local-daemon | <actual clipboard>
-```
-
-### Chaining
-
-Basically the same workflow above, repeated n times until finally you reach local clipboard.
-
