@@ -30,7 +30,7 @@ This makes it amazingly versatile.
 
 You literally just run `cssh <ssh-args>` or `cdocker <container-name>`.
 
-No background daemon required.
+No local daemon required. The remote "daemon" is just a subprocess of a subprocess. Zero cost when you are not using it.
 
 ---
 
