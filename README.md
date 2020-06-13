@@ -57,7 +57,7 @@ You don't have to use these. Things like `pbcopy` and `pbpaste` will continue to
 
 --
 
-Launch **remote daemon** with one of
+**Connect to remote** with one of
 
 `cssh <ssh-args>`
 
