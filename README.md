@@ -4,11 +4,11 @@
 
 **Both remote and local**
 
+Works out of the 📦 with most programs that use `pbcopy`, `xclip`, `wl-copy`, etc.
+
 Works the same locally as over SSH, inside Docker containers, et al.
 
 It even works inside Docker over SSH and then inside Docker!, **infinitely chainable**.
-
-Works out of the 📦 with most programs that use `pbcopy`, `xclip`, `wl-copy`, etc.
 
 ![clippy](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg)
 
