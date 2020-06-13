@@ -16,6 +16,8 @@ Works out of the 📦 with most programs that use `pbcopy`, `xclip`, `wl-copy`, 
 
 ## Networkless
 
+![diagram](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/diagram.png)
+
 ---
 
 ## How to use
