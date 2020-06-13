@@ -4,7 +4,7 @@ title: Isomorphic Copy
 showcase: True
 
 desc: >-
-   Cross platform clipboard
+   Cross platform clipboard | remote copy
 
 images:
   - https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg
