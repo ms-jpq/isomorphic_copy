@@ -26,6 +26,14 @@ This makes it amazingly versatile.
 
 ---
 
+## Daemonless
+
+You literally just run `cssh <ssh-args>` or `cdocker <container-name>`.
+
+No background daemon required.
+
+---
+
 ## How to use
 
 Requires `xclip` or `wl-clipboard` under GUI linux.
