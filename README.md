@@ -71,7 +71,7 @@ Remote applications that use `xclip`, `pbcopy`, `wl-copy` will propagate to loca
 
 **Local -> SSH -> Docker**
 
-If you have to copy inside a `Docker` container on a remote machine via `SSH`
+If you want to copy from a `Docker` container on a remote machine.
 
 from local run `cssh <ssh-args>` to remote
 
