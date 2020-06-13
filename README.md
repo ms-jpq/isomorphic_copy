@@ -2,15 +2,19 @@
 
 **Cross platform clipboard.**
 
+**Both remote and local**
+
 Works the same locally as over SSH, inside Docker containers, et al.
 
 It even works inside Docker over SSH and then inside Docker!, **infinitely chainable**.
 
-It will **pretend** it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
-
-Works out of the 📦 with most programs that use those commands.
+Works out of the 📦 with most programs that use `pbcopy`, `xclip`, `wl-copy`, etc.
 
 ![clippy](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg)
+
+---
+
+## Networkless
 
 ---
 
