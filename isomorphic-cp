@@ -169,7 +169,7 @@ async def cssh_run(args: List[str]) -> None:
   proc: Process = await create_subprocess_exec(
       *exe, stdin=DEVNULL, stdout=PIPE)
 
-  print(" ".join(exe))
+  print(f"Communicating via:\n{' '.join(exe)}")
   while True:
     code = proc.returncode
     if code:
