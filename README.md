@@ -2,15 +2,35 @@
 
 **Cross platform clipboard.**
 
+**Both remote and local**
+
+**Works out of the 📦** with most programs that use `pbcopy`, `xclip`, `wl-copy`, etc.
+
 Works the same locally as over SSH, inside Docker containers, et al.
 
 It even works inside Docker over SSH and then inside Docker!, **infinitely chainable**.
 
-It will **pretend** it's `pbcopy`, `xclip`, `wl-copy`, etc. and forward calls to appropriate destinations.
-
-Works out of the 📦 with most programs that use those commands.
-
 ![clippy](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/clippy.jpg)
+
+---
+
+## Networkless
+
+`isomorphic-cp` communicates by `stdio`  and `unix socket` only!
+
+All it does is spawn subprocesses and listen to `IO`.
+
+This makes it amazingly versatile.
+
+![diagram](https://raw.githubusercontent.com/ms-jpq/isomorphic-copy/master/preview/diagram.png)
+
+---
+
+## Daemonless
+
+You literally just run `cssh <ssh-args>` or `cdocker <container-name>`.
+
+No local daemon required. The remote "daemon" is just a subprocess of a subprocess. Zero cost when you are not using it.
 
 ---
 
@@ -45,7 +65,7 @@ You don't have to use these. Things like `pbcopy` and `pbpaste` will continue to
 
 --
 
-Launch **remote daemon** with one of
+**Connect to remote** with one of
 
 `cssh <ssh-args>`
 
@@ -59,7 +79,7 @@ Remote applications that use `xclip`, `pbcopy`, `wl-copy` will propagate to loca
 
 **Local -> SSH -> Docker**
 
-If you have to copy inside a `Docker` container on a remote machine via `SSH`
+If you want to copy from a `Docker` container on a remote machine.
 
 from local run `cssh <ssh-args>` to remote
 
@@ -127,32 +147,3 @@ If not, check if they require `DISPLAY` like Neovim.
 If no system / tmux clipboard is found, setting environmental variable `ISOCP_USE_FILE=1` will enable using a temp file as a crude clipboard.
 
 It will write inside the git repo, put it somewhere safe.
-
-## How does it work?
-
-### PATH
-
-`isomorphic-copy` inserts itself in the `PATH` before actual system clipboards. It will forward calls to system / tmux / remote clipboards.
-
-### Remote detection
-
-`isomorphic-copy` will use `SSH_TTY` env var and `/.dockerenv` file to detect remote sessions. If running under remote session, it will communicate with remote daemon via an UNIX socket.
-
-### Twin Daemons
-
-To communicate with remote, `isomorphic-copy` will launch a local daemon, which will then launch itself as a remote daemon.
-
-The two daemons communicate via stdout. It's so stupidly simple that it will work absolutely everywhere.
-
-Remote copy look something like this.
-
-```
-<third party app> | fake xclip | isomorphic-copy > unix-socket ->
-
-unix-socket -> remote-daemon > /dev/stdout | local-daemon | <actual clipboard>
-```
-
-### Chaining
-
-Basically the same workflow above, repeated n times until finally you reach local clipboard.
-
