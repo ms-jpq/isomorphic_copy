@@ -1,9 +1,12 @@
-FROM ubuntu:latest
+ARG PYTHON_VER="3.6.10"
+
+FROM python:${PYTHON_VER}
 
 
 # Requirements
+ENTRYPOINT ["bash"]
 RUN apt update && \
-    apt upgrade -y python3 tmux vim neovim && \
+    apt install -y tmux vim neovim && \
     export XDG_CONFIG_HOME="$HOME/.config" && \
     export XDG_DATA_HOME="$HOME/.local/share" && \
     mkdir -p "$XDG_CONFIG_HOME/isomorphic-copy" && \
