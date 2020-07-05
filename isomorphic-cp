@@ -13,12 +13,12 @@ from asyncio import (
 from asyncio.events import AbstractServer
 from asyncio.subprocess import DEVNULL, PIPE, Process, create_subprocess_exec
 from datetime import datetime
-from os import environ, getcwd
+from os import environ
 from os.path import basename, dirname, isfile, join, relpath
 from pathlib import Path
 from shutil import which
 from sys import argv, stderr, stdin
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 #################### ########### ####################
 #################### INIT Region ####################
@@ -40,7 +40,7 @@ def path_mask() -> None:
     environ["PATH"] = ":".join(paths)
 
 
-async def call(prog: str, *args: List[str], input: bytes = None) -> None:
+async def call(prog: str, *args: str, input: bytes = None) -> None:
     proc: Process = await create_subprocess_exec(prog, *args, stdin=PIPE)
     await proc.communicate(input)
     if proc.returncode != 0:
@@ -78,8 +78,8 @@ async def rcp(data: bytes) -> None:
         await writer.drain()
 
 
-async def copy(data: Optional[bytes] = None) -> None:
-    data: bytes = data or stdin.read().strip("\n").encode()
+async def copy(text: Optional[bytes] = None) -> None:
+    data: bytes = text or stdin.read().strip("\n").encode()
     tasks = []
 
     if is_remote():
@@ -153,7 +153,10 @@ async def paste() -> None:
 
 
 def cssh_cmd() -> Tuple[List[str], List[str]]:
-    lookup = {"cssh": (["ssh"], []), "cdocker": (["docker", "exec"], [])}
+    lookup: Dict[str, Tuple[List[str], List[str]]] = {
+        "cssh": (["ssh"], []),
+        "cdocker": (["docker", "exec"], []),
+    }
     return lookup[__name__]
 
 
@@ -173,6 +176,7 @@ async def cssh_run(args: List[str]) -> None:
     prog = cssh_prog()
     exe = [*prev, *args, *post, "sh", "-c", prog]
     proc: Process = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
+    stdout = cast(StreamReader, proc.stdout)
 
     print(f"Communicating via:\n{' '.join(exe)}")
     while True:
@@ -182,7 +186,7 @@ async def cssh_run(args: List[str]) -> None:
             break
         else:
             try:
-                data: bytes = await proc.stdout.readuntil(b"\0")
+                data: bytes = await stdout.readuntil(b"\0")
             except IncompleteReadError:
                 break
             else:
