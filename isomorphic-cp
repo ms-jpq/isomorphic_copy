@@ -79,7 +79,7 @@ async def rcp(data: bytes) -> None:
 
 
 async def copy(text: Optional[bytes] = None) -> None:
-    data: bytes = text or stdin.read().strip("\n").encode()
+    data: bytes = text or stdin.read().encode()
     tasks = []
 
     if is_remote():
