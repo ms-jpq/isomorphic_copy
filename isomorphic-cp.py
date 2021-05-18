@@ -40,11 +40,11 @@ _LOCAL_WRITE = "ISOCP_USE_FILE" in environ
 
 
 def _path_mask() -> None:
-    paths = (path for path in environ["PATH"].split(pathsep) if path != _BIN)
+    paths = (path for path in environ["PATH"].split(pathsep) if path != str(_BIN))
     environ["PATH"] = pathsep.join(paths)
 
 
-async def _call(prog: str, *args: str, stdin: bytes = None) -> None:
+async def _call(prog: str, *args: str, stdin: Optional[bytes] = None) -> None:
     proc = await create_subprocess_exec(prog, *args, stdin=PIPE)
     await proc.communicate(stdin)
     if proc.returncode != 0:
@@ -90,7 +90,7 @@ async def _copy(text: Optional[bytes]) -> None:
     if which("pbcopy"):
         tasks.append(_call("pbcopy", stdin=data))
 
-    elif which("wl-copy") and "WAYLAND_DISPLAY" in environ:
+    if which("wl-copy") and "WAYLAND_DISPLAY" in environ:
         tasks.append(_call("wl-copy", stdin=data))
 
     elif which("xclip") and "DISPLAY" in environ:
