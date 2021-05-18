@@ -18,7 +18,7 @@ from os import environ, linesep, pathsep
 from pathlib import Path
 from shlex import join, quote
 from shutil import which
-from sys import argv, stderr, stdin
+from sys import argv, stderr, stdin, stdout
 from typing import Optional, Sequence, Tuple, cast
 
 #################### ########### ####################
@@ -125,16 +125,16 @@ async def _paste() -> None:
 
     elif _LOCAL_WRITE:
         if _WRITE_PATH.exists():
-            text = _WRITE_PATH.read_text()
-            print(text, end="", flush=True)
+            data = _WRITE_PATH.read_bytes()
+            stdout.buffer.write(data)
+            stdout.buffer.flush()
 
     else:
         print(
             "⚠️  No system clipboard detected ⚠️",
-            linesep * 2,
             "export ISOCP_USE_FILE=1 to use temp file",
+            sep=linesep * 2,
             file=stderr,
-            sep="",
         )
         exit(1)
 
@@ -158,23 +158,25 @@ def _cssh_prog() -> str:
     try:
         rel_path = canonical.relative_to(Path.home())
     except ValueError:
-        return str(canonical)
+        return quote(str(canonical))
     else:
-        return str(Path("$HOME") / rel_path)
+        return '"$HOME"' + quote(str(rel_path))
 
 
 async def _cssh_run(args: Sequence[str]) -> None:
     prev, post = _cssh_cmd()
     prog = _cssh_prog()
-    exe = (*prev, *args, *post, "sh", "-c", quote(prog))
+    exe = (*prev, *args, *post, "sh", "-c", prog)
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
     stdout = cast(StreamReader, proc.stdout)
 
-    print(f"Communicating via:", linesep, " ".join(exe), sep="")
+    sh = " ".join(exe)
+    print(f"Communicating via:", sh, sep=linesep, file=stderr)
+
     while True:
         code = proc.returncode
         if code:
-            print(f"daemon exited - {code}", file=stderr)
+            print(f"daemon exited - ", code, file=stderr)
             break
         else:
             try:
@@ -183,7 +185,7 @@ async def _cssh_run(args: Sequence[str]) -> None:
                 break
             else:
                 time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(linesep, f"-- RECV -- {time}", linesep, sep="")
+                print(linesep, f"-- RECV -- {time}", linesep, sep="", file=stderr)
                 await _copy(data[:-1])
 
 
@@ -202,7 +204,8 @@ async def _cssh() -> None:
 async def _csshd() -> None:
     async def handler(reader: StreamReader, _: StreamWriter) -> None:
         data = await reader.readuntil(_NUL)
-        print(data.decode(), end="", flush=True)
+        stdout.buffer.write(data)
+        stdout.buffer.flush()
 
     server: AbstractServer = await start_unix_server(handler, _SOCKET_PATH)
     await server.wait_closed()
