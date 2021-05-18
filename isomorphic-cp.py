@@ -13,8 +13,10 @@ from asyncio import (
 from asyncio.events import AbstractServer
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from datetime import datetime
+from itertools import chain
 from os import environ, linesep, pathsep
 from pathlib import Path
+from shlex import join, quote
 from shutil import which
 from sys import argv, stderr, stdin
 from typing import Optional, Sequence, Tuple, cast
@@ -34,7 +36,7 @@ _WRITE_PATH = _TMP / "clipboard.txt"
 
 _NAME = Path(argv[1]).name
 _ARGS = argv[2:]
-_LOCAL_WRITE = environ.get("ISOCP_USE_FILE") is not None
+_LOCAL_WRITE = "ISOCP_USE_FILE" in environ
 
 
 def _path_mask() -> None:
@@ -52,10 +54,6 @@ async def _call(prog: str, *args: str, stdin: bytes = None) -> None:
 #################### ########### ####################
 #################### Copy Region ####################
 #################### ########### ####################
-
-
-def _local_copy(data: bytes) -> None:
-    _WRITE_PATH.write_bytes(data)
 
 
 def _is_remote() -> bool:
@@ -86,21 +84,21 @@ async def _copy(text: Optional[bytes]) -> None:
     if _is_remote():
         tasks.append(_rcp(data))
 
-    if environ.get("TMUX"):
+    if "TMUX" in environ:
         tasks.append(_call("tmux", "load-buffer", "-", stdin=data))
 
     if which("pbcopy"):
         tasks.append(_call("pbcopy", stdin=data))
 
-    elif environ.get("WAYLAND_DISPLAY") and which("wl-copy"):
+    elif which("wl-copy") and "WAYLAND_DISPLAY" in environ:
         tasks.append(_call("wl-copy", stdin=data))
 
-    elif environ.get("DISPLAY") and which("xclip"):
+    elif which("xclip") and "DISPLAY" in environ:
         tasks.append(_call("xclip", *_ARGS, "-selection", "clipboard", stdin=data))
         tasks.append(_call("xclip", *_ARGS, "-selection", "primary", stdin=data))
 
     elif _LOCAL_WRITE:
-        _local_copy(data)
+        _WRITE_PATH.write_bytes(data)
 
     await gather(*tasks)
 
@@ -110,23 +108,15 @@ async def _copy(text: Optional[bytes]) -> None:
 #################### ############ ####################
 
 
-def _local_paste() -> None:
-    try:
-        text = _WRITE_PATH.read_text()
-        print(text, end="", flush=True)
-    except OSError:
-        pass
-
-
 async def _paste() -> None:
     if which("pbpaste"):
         await _call("pbpaste")
 
-    elif environ.get("WAYLAND_DISPLAY") and which("wl-paste"):
+    elif which("wl-copy") and "WAYLAND_DISPLAY" in environ:
         await _call("wl-paste")
 
-    elif environ.get("DISPLAY") and which("xclip"):
-        args = (*_ARGS, "-out") if set(_ARGS).isdisjoint({"-o", "-out"}) else _ARGS
+    elif which("xclip") and "DISPLAY" in environ:
+        args = (*_ARGS, "-out") if {*_ARGS}.isdisjoint({"-o", "-out"}) else _ARGS
         await _call("xclip", *args, "-selection", "clipboard")
         # await call("xclip", *args, "-selection", "primary")
 
@@ -134,7 +124,9 @@ async def _paste() -> None:
         await _call("tmux", "save-buffer", "-")
 
     elif _LOCAL_WRITE:
-        _local_paste()
+        if _WRITE_PATH.exists():
+            text = _WRITE_PATH.read_text()
+            print(text, end="", flush=True)
 
     else:
         print(
@@ -168,13 +160,13 @@ def _cssh_prog() -> str:
     except ValueError:
         return str(canonical)
     else:
-        return f"\"$HOME\"'{rel_path}'"
+        return str(Path("$HOME") / rel_path)
 
 
 async def _cssh_run(args: Sequence[str]) -> None:
     prev, post = _cssh_cmd()
     prog = _cssh_prog()
-    exe = (*prev, *args, *post, "sh", "-c", prog)
+    exe = (*prev, *args, *post, "sh", "-c", quote(prog))
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
     stdout = cast(StreamReader, proc.stdout)
 
@@ -251,7 +243,8 @@ async def main() -> None:
     elif _is_copy():
         await _copy(None)
     else:
-        print(f"Unknown -- {_NAME} {' '.join(_ARGS)}", file=stderr)
+        sh = join(chain((_NAME,), _ARGS))
+        print(f"Unknown -- ", sh, file=stderr)
         exit(1)
 
 

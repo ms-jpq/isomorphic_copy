@@ -7,7 +7,7 @@ set -eu
 ###################
 
 prog="$0"
-iso_cp="$(dirname "$(dirname "$0")")/isomorphic-cp"
+iso_cp="$(dirname "$(dirname "$0")")/isomorphic-cp.py"
 
 
 if [ -x /usr/local/bin/python3 ]
