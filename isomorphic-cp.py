@@ -59,7 +59,7 @@ async def _call(prog: str, *args: str, stdin: Optional[bytes] = None) -> None:
 def _is_remote() -> bool:
     if "SSH_TTY" in environ:
         return True
-    elif Path("/", ".dockerenv").exists():
+    elif Path(sep, ".dockerenv").exists():
         return True
     else:
         return False
@@ -170,13 +170,13 @@ async def _cssh_run(args: Sequence[str]) -> None:
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
     stdout = cast(StreamReader, proc.stdout)
 
-    sh = " ".join(exe)
-    print(f"Communicating via:", sh, sep=linesep, file=stderr)
+    sh = join(exe)
+    print(f"Establishing link via:", sh, sep=linesep, file=stderr)
 
     while True:
         code = proc.returncode
         if code:
-            print(f"daemon exited - ", code, file=stderr)
+            print(f"Exited - ", code, file=stderr)
             break
         else:
             try:
@@ -185,14 +185,20 @@ async def _cssh_run(args: Sequence[str]) -> None:
                 break
             else:
                 time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(linesep, f"-- RECV -- {time}", linesep, sep="", file=stderr)
                 await _copy(data[:-1])
+                print(
+                    linesep,
+                    f"-- RECV -- {time}",
+                    linesep,
+                    sep="",
+                    file=stderr,
+                )
 
 
 async def _cssh() -> None:
     while True:
         await _cssh_run(_ARGS)
-        print("\a", end="")
+        print("\a", end="", file=stderr)
         await sleep(1)
 
 
