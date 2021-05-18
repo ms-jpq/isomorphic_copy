@@ -14,7 +14,7 @@ from asyncio.events import AbstractServer
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from datetime import datetime
 from itertools import chain
-from os import environ, linesep, pathsep
+from os import environ, linesep, pathsep, sep
 from pathlib import Path
 from shlex import join, quote
 from shutil import which
@@ -160,7 +160,7 @@ def _cssh_prog() -> str:
     except ValueError:
         return quote(str(canonical))
     else:
-        return '"$HOME"' + quote(str(rel_path))
+        return '"$HOME"' + quote(str(Path(sep, rel_path)))
 
 
 async def _cssh_run(args: Sequence[str]) -> None:
