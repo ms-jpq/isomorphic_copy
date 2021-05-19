@@ -72,7 +72,7 @@ def _is_remote() -> bool:
 
 async def _rcp(data: bytes) -> None:
     try:
-        conn = await open_unix_connection(_SOCKET_PATH)
+        conn = await open_unix_connection(str(_SOCKET_PATH))
     except (FileNotFoundError, ConnectionRefusedError):
         pass
     else:
