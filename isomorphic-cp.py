@@ -36,9 +36,6 @@ _SOCKET_PATH = _TMP / "cp.socket"
 _WRITE_PATH = _TMP / "clipboard.txt"
 
 
-_LOCAL_WRITE = "ISOCP_USE_FILE" in environ
-
-
 def _path_mask() -> None:
     paths = (path for path in environ["PATH"].split(pathsep) if path != str(_BIN))
     environ["PATH"] = pathsep.join(paths)
@@ -81,7 +78,7 @@ async def _rcp(data: bytes) -> None:
         await writer.drain()
 
 
-async def _copy(args: Sequence[str], data: Optional[bytes]) -> None:
+async def _copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> None:
     data = data or stdin.read().encode()
     tasks = []
 
@@ -101,7 +98,7 @@ async def _copy(args: Sequence[str], data: Optional[bytes]) -> None:
         tasks.append(_call("xclip", *args, "-selection", "clipboard", stdin=data))
         tasks.append(_call("xclip", *args, "-selection", "primary", stdin=data))
 
-    elif _LOCAL_WRITE:
+    elif local:
         _WRITE_PATH.write_bytes(data)
 
     await gather(*tasks)
@@ -112,7 +109,7 @@ async def _copy(args: Sequence[str], data: Optional[bytes]) -> None:
 #################### ############ ####################
 
 
-async def _paste(args: Sequence[str]) -> None:
+async def _paste(local: bool, args: Sequence[str]) -> None:
     if which("pbpaste"):
         await _call("pbpaste")
 
@@ -127,7 +124,7 @@ async def _paste(args: Sequence[str]) -> None:
     elif "TMUX" in environ:
         await _call("tmux", "save-buffer", "-")
 
-    elif _LOCAL_WRITE:
+    elif local:
         if _WRITE_PATH.exists():
             data = _WRITE_PATH.read_bytes()
             stdout.buffer.write(data)
@@ -167,7 +164,7 @@ def _cssh_prog() -> str:
         return '"$HOME"' + quote(str(Path(sep, rel_path)))
 
 
-async def _cssh_run(name: str, args: Sequence[str]) -> None:
+async def _cssh_run(local: bool, name: str, args: Sequence[str]) -> None:
     prev, post = _cssh_cmd(name)
     prog = _cssh_prog()
     exe = (*prev, *args, *post, "sh", "-c", prog)
@@ -189,7 +186,7 @@ async def _cssh_run(name: str, args: Sequence[str]) -> None:
                 break
             else:
                 time = datetime.now().strftime(_TIME_FMT)
-                await _copy(args, data=data[:-1])
+                await _copy(local, args=args, data=data[:-1])
                 print(
                     linesep,
                     f"-- RECV -- {time}",
@@ -199,9 +196,9 @@ async def _cssh_run(name: str, args: Sequence[str]) -> None:
                 )
 
 
-async def _cssh(name: str, args: Sequence[str]) -> None:
+async def _cssh(local: bool, name: str, args: Sequence[str]) -> None:
     while True:
-        await _cssh_run(name, args=args)
+        await _cssh_run(local, name=name, args=args)
         print("\a", end="", file=stderr)
         await sleep(1)
 
@@ -254,15 +251,16 @@ async def main() -> None:
     _path_mask()
     ns, args = _parse_args()
     name = Path(ns.name).name
+    local = "ISOCP_USE_FILE" in environ
 
     if name in {"cssh", "cdocker"}:
-        await _cssh(name, args=args)
+        await _cssh(local, name=name, args=args)
     elif name == "csshd":
         await _csshd()
     elif _is_paste(name, args=args):
-        await _paste(args)
+        await _paste(local, args=args)
     elif _is_copy(name, args=args):
-        await _copy(args, data=None)
+        await _copy(local, args=args, data=None)
     else:
         sh = _join(chain((name,), args))
         print(f"Unknown -- ", sh, file=stderr)
