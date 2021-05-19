@@ -124,7 +124,7 @@ async def _paste(args: Sequence[str]) -> None:
         await _call("xclip", *xargs, "-selection", "clipboard")
         # await call("xclip", *args, "-selection", "primary")
 
-    elif environ.get("TMUX"):
+    elif "TMUX" in environ:
         await _call("tmux", "save-buffer", "-")
 
     elif _LOCAL_WRITE:
