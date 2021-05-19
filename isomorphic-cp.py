@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from argparse import ArgumentParser, Namespace
 from asyncio import (
     IncompleteReadError,
     StreamReader,
@@ -18,7 +19,7 @@ from os import environ, linesep, pathsep, sep
 from pathlib import Path
 from shlex import quote
 from shutil import which
-from sys import argv, stderr, stdin, stdout
+from sys import stderr, stdin, stdout
 from typing import Iterable, Optional, Sequence, Tuple, cast
 
 #################### ########### ####################
@@ -35,8 +36,6 @@ _SOCKET_PATH = _TMP / "cp.socket"
 _WRITE_PATH = _TMP / "clipboard.txt"
 
 
-_NAME = Path(argv[1]).name
-_ARGS = argv[2:]
 _LOCAL_WRITE = "ISOCP_USE_FILE" in environ
 
 
@@ -45,7 +44,7 @@ def _path_mask() -> None:
     environ["PATH"] = pathsep.join(paths)
 
 
-def join(cmds: Iterable[str]) -> str:
+def _join(cmds: Iterable[str]) -> str:
     return " ".join(map(quote, cmds))
 
 
@@ -82,8 +81,8 @@ async def _rcp(data: bytes) -> None:
         await writer.drain()
 
 
-async def _copy(text: Optional[bytes]) -> None:
-    data: bytes = text or stdin.read().encode()
+async def _copy(args: Sequence[str], data: Optional[bytes]) -> None:
+    data = data or stdin.read().encode()
     tasks = []
 
     if _is_remote():
@@ -99,8 +98,8 @@ async def _copy(text: Optional[bytes]) -> None:
         tasks.append(_call("wl-copy", stdin=data))
 
     elif which("xclip") and "DISPLAY" in environ:
-        tasks.append(_call("xclip", *_ARGS, "-selection", "clipboard", stdin=data))
-        tasks.append(_call("xclip", *_ARGS, "-selection", "primary", stdin=data))
+        tasks.append(_call("xclip", *args, "-selection", "clipboard", stdin=data))
+        tasks.append(_call("xclip", *args, "-selection", "primary", stdin=data))
 
     elif _LOCAL_WRITE:
         _WRITE_PATH.write_bytes(data)
@@ -113,7 +112,7 @@ async def _copy(text: Optional[bytes]) -> None:
 #################### ############ ####################
 
 
-async def _paste() -> None:
+async def _paste(args: Sequence[str]) -> None:
     if which("pbpaste"):
         await _call("pbpaste")
 
@@ -121,8 +120,8 @@ async def _paste() -> None:
         await _call("wl-paste")
 
     elif which("xclip") and "DISPLAY" in environ:
-        args = (*_ARGS, "-out") if {*_ARGS}.isdisjoint({"-o", "-out"}) else _ARGS
-        await _call("xclip", *args, "-selection", "clipboard")
+        xargs = chain(args, ("-out",)) if {*args}.isdisjoint({"-o", "-out"}) else args
+        await _call("xclip", *xargs, "-selection", "clipboard")
         # await call("xclip", *args, "-selection", "primary")
 
     elif environ.get("TMUX"):
@@ -149,12 +148,12 @@ async def _paste() -> None:
 #################### ########### ####################
 
 
-def _cssh_cmd() -> Tuple[Sequence[str], Sequence[str]]:
+def _cssh_cmd(name: str) -> Tuple[Sequence[str], Sequence[str]]:
     lookup = {
         "cssh": (("ssh",), ()),
         "cdocker": (("docker", "exec"), ()),
     }
-    return lookup[_NAME]
+    return lookup[name]
 
 
 def _cssh_prog() -> str:
@@ -168,14 +167,14 @@ def _cssh_prog() -> str:
         return '"$HOME"' + quote(str(Path(sep, rel_path)))
 
 
-async def _cssh_run(args: Sequence[str]) -> None:
-    prev, post = _cssh_cmd()
+async def _cssh_run(name: str, args: Sequence[str]) -> None:
+    prev, post = _cssh_cmd(name)
     prog = _cssh_prog()
     exe = (*prev, *args, *post, "sh", "-c", prog)
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
     stdout = cast(StreamReader, proc.stdout)
 
-    sh = join(exe)
+    sh = _join(exe)
     print(f"Establishing link via:", sh, sep=linesep, file=stderr)
 
     while True:
@@ -190,7 +189,7 @@ async def _cssh_run(args: Sequence[str]) -> None:
                 break
             else:
                 time = datetime.now().strftime(_TIME_FMT)
-                await _copy(data[:-1])
+                await _copy(args, data=data[:-1])
                 print(
                     linesep,
                     f"-- RECV -- {time}",
@@ -200,9 +199,9 @@ async def _cssh_run(args: Sequence[str]) -> None:
                 )
 
 
-async def _cssh() -> None:
+async def _cssh(name: str, args: Sequence[str]) -> None:
     while True:
-        await _cssh_run(_ARGS)
+        await _cssh_run(name, args=args)
         print("\a", end="", file=stderr)
         await sleep(1)
 
@@ -227,37 +226,45 @@ async def _csshd() -> None:
 #################### ########### ####################
 
 
-def _is_copy() -> bool:
-    if _NAME in {"c", "pbcopy", "wl-copy"}:
+def _is_copy(name: str, args: Sequence[str]) -> bool:
+    if name in {"c", "pbcopy", "wl-copy"}:
         return True
-    elif _NAME == "xclip" and {*_ARGS}.isdisjoint({"-o", "-out"}):
+    elif name == "xclip" and {*args}.isdisjoint({"-o", "-out"}):
         return True
     else:
         return False
 
 
-def _is_paste() -> bool:
-    if _NAME in {"p", "pbpaste", "wl-paste"}:
+def _is_paste(name: str, args: Sequence[str]) -> bool:
+    if name in {"p", "pbpaste", "wl-paste"}:
         return True
-    elif _NAME == "xclip" and not {*_ARGS}.isdisjoint({"-o", "-out"}):
+    elif name == "xclip" and not {*args}.isdisjoint({"-o", "-out"}):
         return True
     else:
         return False
+
+
+def _parse_args() -> Tuple[Namespace, Sequence[str]]:
+    parser = ArgumentParser()
+    parser.add_argument("name")
+    return parser.parse_known_args()
 
 
 async def main() -> None:
     _path_mask()
+    ns, args = _parse_args()
+    name = ns.name
 
-    if _NAME in {"cssh", "cdocker"}:
-        await _cssh()
-    elif _NAME == "csshd":
+    if name in {"cssh", "cdocker"}:
+        await _cssh(name, args=args)
+    elif name == "csshd":
         await _csshd()
-    elif _is_paste():
-        await _paste()
-    elif _is_copy():
-        await _copy(None)
+    elif _is_paste(name, args=args):
+        await _paste(args)
+    elif _is_copy(name, args=args):
+        await _copy(args, data=None)
     else:
-        sh = join(chain((_NAME,), _ARGS))
+        sh = _join(chain((name,), args))
         print(f"Unknown -- ", sh, file=stderr)
         exit(1)
 
