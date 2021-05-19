@@ -147,7 +147,7 @@ async def _paste(local: bool, args: Sequence[str]) -> None:
 
 def _cssh_cmd(name: str) -> Tuple[Sequence[str], Sequence[str]]:
     lookup = {
-        "cssh": (("ssh",), ()),
+        "cssh": (("ssh", "-T"), ()),
         "cdocker": (("docker", "exec"), ()),
     }
     return lookup[name]
