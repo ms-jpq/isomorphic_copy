@@ -16,10 +16,10 @@ from datetime import datetime
 from itertools import chain
 from os import environ, linesep, pathsep, sep
 from pathlib import Path
-from shlex import join, quote
+from shlex import quote
 from shutil import which
 from sys import argv, stderr, stdin, stdout
-from typing import Optional, Sequence, Tuple, cast
+from typing import Iterable, Optional, Sequence, Tuple, cast
 
 #################### ########### ####################
 #################### INIT Region ####################
@@ -43,6 +43,10 @@ _LOCAL_WRITE = "ISOCP_USE_FILE" in environ
 def _path_mask() -> None:
     paths = (path for path in environ["PATH"].split(pathsep) if path != str(_BIN))
     environ["PATH"] = pathsep.join(paths)
+
+
+def join(cmds: Iterable[str]) -> str:
+    return " ".join(map(quote, cmds))
 
 
 async def _call(prog: str, *args: str, stdin: Optional[bytes] = None) -> None:
@@ -214,7 +218,7 @@ async def _csshd() -> None:
         stdout.buffer.write(data)
         stdout.buffer.flush()
 
-    server: AbstractServer = await start_unix_server(handler, _SOCKET_PATH)
+    server: AbstractServer = await start_unix_server(handler, str(_SOCKET_PATH))
     await server.wait_closed()
 
 
