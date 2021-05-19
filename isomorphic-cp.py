@@ -253,7 +253,7 @@ def _parse_args() -> Tuple[Namespace, Sequence[str]]:
 async def main() -> None:
     _path_mask()
     ns, args = _parse_args()
-    name = ns.name
+    name = Path(ns.name).name
 
     if name in {"cssh", "cdocker"}:
         await _cssh(name, args=args)
