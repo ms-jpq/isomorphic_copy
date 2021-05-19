@@ -26,6 +26,7 @@ from typing import Optional, Sequence, Tuple, cast
 #################### ########### ####################
 
 _NUL = b"\0"
+_TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
 _DIR = Path(__file__).resolve().parent
 _BIN = _DIR / "bin"
@@ -184,7 +185,7 @@ async def _cssh_run(args: Sequence[str]) -> None:
             except IncompleteReadError:
                 break
             else:
-                time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                time = datetime.now().strftime(_TIME_FMT)
                 await _copy(data[:-1])
                 print(
                     linesep,
