@@ -7,16 +7,16 @@ set -eu
 ###################
 
 prog="$0"
-iso_cp="$(dirname "$(dirname "$0")")/isomorphic-cp.py"
+cd "$(dirname "$(dirname "$prog")")" || exit 1
 
 
 if [ -x /usr/local/bin/python3 ]
 then
-  exec /usr/local/bin/python3  "$iso_cp" "$prog" "$@"
+  exec /usr/local/bin/python3  -m iso_cp -- "$prog" "$@"
 elif [ -x /usr/bin/python3 ]
 then
-  exec /usr/bin/python3        "$iso_cp" "$prog" "$@"
+  exec /usr/bin/python3        -m iso_cp -- "$prog" "$@"
 else
-  exec /usr/bin/env -S python3 "$iso_cp" "$prog" "$@"
+  exec /usr/bin/env -S python3 -m iso_cp -- "$prog" "$@"
 fi
 
