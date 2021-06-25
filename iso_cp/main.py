@@ -22,7 +22,7 @@ def _link() -> None:
     python = Path(executable).resolve()
     try:
         if Path(readlink(EXEC)) != python:
-            EXEC.unlink(missing_ok=True)
+            EXEC.unlink()
             EXEC.symlink_to(python)
     except FileNotFoundError:
         EXEC.symlink_to(python)
