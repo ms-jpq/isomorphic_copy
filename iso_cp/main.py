@@ -20,11 +20,10 @@ def _path_mask() -> None:
 
 def _link() -> None:
     try:
-        mklink = readlink(EXEC) != executable
+        if readlink(EXEC) != executable:
+            EXEC.unlink(missing_ok=True)
+            EXEC.symlink_to(executable)
     except FileNotFoundError:
-        mklink = True
-
-    if mklink:
         EXEC.symlink_to(executable)
 
 
