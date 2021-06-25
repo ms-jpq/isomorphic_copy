@@ -1,11 +1,12 @@
 from argparse import ArgumentParser, Namespace
 from itertools import chain
 from locale import strxfrm
-from os import environ, pathsep
+from os import environ, pathsep, readlink
 from pathlib import Path
+from sys import executable
 from typing import Sequence, Tuple
 
-from .consts import BIN
+from .consts import BIN, EXEC
 from .copy import copy
 from .local_daemon import l_daemon
 from .paste import paste
@@ -15,6 +16,16 @@ from .remote_daemon import r_daemon
 def _path_mask() -> None:
     paths = (path for path in environ["PATH"].split(pathsep) if path != str(BIN))
     environ["PATH"] = pathsep.join(paths)
+
+
+def _link() -> None:
+    try:
+        mklink = readlink(EXEC) != executable
+    except FileNotFoundError:
+        mklink = True
+
+    if mklink:
+        EXEC.symlink_to(executable)
 
 
 def _is_copy(name: str, args: Sequence[str]) -> bool:
@@ -43,15 +54,14 @@ def _legal_names() -> Sequence[str]:
 
 def _parse_args() -> Tuple[Namespace, Sequence[str]]:
     parser = ArgumentParser()
-    parser.add_argument(
-        "name",
-        choices=_legal_names(),
-    )
+    parser.add_argument("name", choices=_legal_names())
     return parser.parse_known_args()
 
 
 async def main() -> int:
     _path_mask()
+    _link()
+
     ns, args = _parse_args()
     name = Path(ns.name).name
     local = "ISOCP_USE_FILE" in environ
