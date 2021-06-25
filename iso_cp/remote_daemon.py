@@ -4,7 +4,7 @@ from sys import stdout
 from .consts import NUL, SOCKET_PATH
 
 
-async def r_daemon() -> None:
+async def r_daemon() -> int:
     async def handler(reader: StreamReader, _: StreamWriter) -> None:
         data = await reader.readuntil(NUL)
         stdout.buffer.write(data)
@@ -12,4 +12,5 @@ async def r_daemon() -> None:
 
     server = await start_unix_server(handler, str(SOCKET_PATH))
     await server.wait_closed()
+    return 1
 

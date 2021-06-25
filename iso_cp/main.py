@@ -42,22 +42,22 @@ def _parse_args() -> Tuple[Namespace, Sequence[str]]:
     return parser.parse_known_args()
 
 
-async def main() -> None:
+async def main() -> int:
     _path_mask()
     ns, args = _parse_args()
     name = Path(ns.name).name
     local = "ISOCP_USE_FILE" in environ
 
     if name in {"cssh", "cdocker"}:
-        await l_daemon(local, name=name, args=args)
+        return await l_daemon(local, name=name, args=args)
     elif name == "csshd":
-        await r_daemon()
+        return await r_daemon()
     elif _is_paste(name, args=args):
-        await paste(local, args=args)
+        return await paste(local, args=args)
     elif _is_copy(name, args=args):
-        await copy(local, args=args, data=None)
+        return await copy(local, args=args, data=None)
     else:
         sh = join(chain((name,), args))
         print(f"Unknown -- ", sh, file=stderr)
-        exit(1)
+        return 1
 

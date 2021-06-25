@@ -35,7 +35,7 @@ async def _zero() -> int:
     return 0
 
 
-async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> None:
+async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
     def cont() -> Iterator[Awaitable[int]]:
         content = data or stdin.read().encode()
         if _is_remote():
@@ -58,5 +58,6 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> None:
             WRITE_PATH.write_bytes(content)
             yield _zero()
 
-    codes = await gather(cont())
+    cum = sum(await gather(*cont()))
+    return cum
 

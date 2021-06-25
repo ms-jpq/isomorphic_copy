@@ -63,7 +63,7 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> None:
                 )
 
 
-async def l_daemon(local: bool, name: str, args: Sequence[str]) -> None:
+async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
     while True:
         await _daemon(local, name=name, args=args)
         print("\a", end="", file=stderr)

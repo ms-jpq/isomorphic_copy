@@ -8,20 +8,20 @@ from .consts import WRITE_PATH
 from .shared import call
 
 
-async def paste(local: bool, args: Sequence[str]) -> None:
+async def paste(local: bool, args: Sequence[str]) -> int:
     if which("pbpaste"):
-        await call("pbpaste")
+        return await call("pbpaste")
 
     elif which("wl-copy") and "WAYLAND_DISPLAY" in environ:
-        await call("wl-paste")
+        return await call("wl-paste")
 
     elif which("xclip") and "DISPLAY" in environ:
         xargs = chain(args, ("-out",)) if {*args}.isdisjoint({"-o", "-out"}) else args
-        await call("xclip", *xargs, "-selection", "clipboard")
-        # await call("xclip", *args, "-selection", "primary")
+        # primary clipboard ???
+        return await call("xclip", *xargs, "-selection", "clipboard")
 
     elif "TMUX" in environ:
-        await call("tmux", "save-buffer", "-")
+        return await call("tmux", "save-buffer", "-")
 
     elif local:
         if WRITE_PATH.exists():
@@ -29,6 +29,7 @@ async def paste(local: bool, args: Sequence[str]) -> None:
             stdout.buffer.write(data)
             stdout.buffer.flush()
 
+        return 0
     else:
         print(
             "⚠️  No system clipboard detected ⚠️",
@@ -36,5 +37,5 @@ async def paste(local: bool, args: Sequence[str]) -> None:
             sep=linesep * 2,
             file=stderr,
         )
-        exit(1)
+        return 1
 
