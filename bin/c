@@ -10,13 +10,11 @@ prog="$0"
 cd "$(dirname "$(dirname "$prog")")" || exit 1
 
 
-if [ -x /usr/local/bin/python3 ]
+EXEC="$PWD/tmp/python"
+if [ -x "$EXEC" ]
 then
-  exec /usr/local/bin/python3  -m iso_cp -- "$prog" "$@"
-elif [ -x /usr/bin/python3 ]
-then
-  exec /usr/bin/python3        -m iso_cp -- "$prog" "$@"
+  exec "$EXEC" -m iso_cp -- "$prog" "$@"
 else
-  exec /usr/bin/env -S python3 -m iso_cp -- "$prog" "$@"
+  exec python3 -m iso_cp -- "$prog" "$@"
 fi
 
