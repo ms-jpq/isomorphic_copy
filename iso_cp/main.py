@@ -2,12 +2,13 @@ from argparse import ArgumentParser, Namespace
 from itertools import chain
 from os import environ, pathsep
 from pathlib import Path
-from sys import stderr
+from textwrap import dedent
 from typing import Sequence, Tuple
 
 from .consts import BIN
 from .copy import copy
 from .local_daemon import l_daemon
+from .logging import log
 from .paste import paste
 from .remote_daemon import r_daemon
 from .shared import join
@@ -58,6 +59,10 @@ async def main() -> int:
         return await copy(local, args=args, data=None)
     else:
         sh = join(chain((name,), args))
-        print(f"Unknown -- ", sh, file=stderr)
+        msg = f"""
+        Unknown --
+        {sh}
+        """
+        log.critical("%s", dedent(msg))
         return 1
 

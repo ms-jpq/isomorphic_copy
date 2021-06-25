@@ -5,9 +5,11 @@ from .main import main
 loop = None
 try:
     loop = get_event_loop()
-    loop.run_until_complete(main())
+    code = loop.run_until_complete(main())
 except KeyboardInterrupt:
     exit(130)
+else:
+    exit(code)
 finally:
     if loop:
         loop.close()

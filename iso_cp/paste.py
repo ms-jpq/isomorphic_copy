@@ -1,10 +1,12 @@
 from itertools import chain
-from os import environ, linesep
+from os import environ
 from shutil import which
-from sys import stderr, stdout
+from sys import stdout
+from textwrap import dedent
 from typing import Sequence
 
 from .consts import WRITE_PATH
+from .logging import log
 from .shared import call
 
 
@@ -31,11 +33,11 @@ async def paste(local: bool, args: Sequence[str]) -> int:
 
         return 0
     else:
-        print(
-            "⚠️  No system clipboard detected ⚠️",
-            "export ISOCP_USE_FILE=1 to use temp file",
-            sep=linesep * 2,
-            file=stderr,
-        )
+        msg = """
+        ⚠️  No system clipboard detected ⚠️ 
+
+        export ISOCP_USE_FILE=1 to use temp file
+        """
+        log.critical("%s", dedent(msg))
         return 1
 

@@ -1,14 +1,16 @@
 from asyncio import IncompleteReadError, StreamReader, sleep
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from datetime import datetime
-from os import linesep, sep
+from os import sep
 from pathlib import Path
 from shlex import quote
 from sys import stderr
+from textwrap import dedent
 from typing import Sequence, Tuple, cast
 
 from .consts import BIN, NUL, TIME_FMT
 from .copy import copy
+from .logging import log
 from .shared import join
 
 
@@ -22,7 +24,6 @@ def _tunnel_cmd(name: str) -> Tuple[Sequence[str], Sequence[str]]:
 
 def _tunneling_prog() -> str:
     canonical = BIN / "csshd"
-
     try:
         rel_path = canonical.relative_to(Path.home())
     except ValueError:
@@ -38,13 +39,16 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> None:
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
     stdout = cast(StreamReader, proc.stdout)
 
-    sh = join(exe)
-    print(f"Establishing link via:", sh, sep=linesep, file=stderr)
+    msg = f"""
+    Establishing link via:
+    {join(exe)}
+    """
+    log.info("%s", dedent(msg))
 
     while True:
-        code = proc.returncode
-        if code:
-            print(f"Exited - ", code, file=stderr)
+        if proc.returncode:
+            msg = f"Exited - {proc.returncode}"
+            log.warn("%s", msg)
             break
         else:
             try:
@@ -54,13 +58,13 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> None:
             else:
                 time = datetime.now().strftime(TIME_FMT)
                 await copy(local, args=args, data=data[:-1])
-                print(
-                    linesep,
-                    f"-- RECV -- {time}",
-                    linesep,
-                    sep="",
-                    file=stderr,
-                )
+
+                msg = f"""
+
+                -- RECV --
+                {time}
+                """
+                log.info("%s", dedent(msg))
 
 
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
