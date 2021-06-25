@@ -1,4 +1,6 @@
 from argparse import ArgumentParser, Namespace
+from itertools import chain
+from locale import strxfrm
 from os import environ, pathsep
 from pathlib import Path
 from typing import Sequence, Tuple
@@ -33,11 +35,17 @@ def _is_paste(name: str, args: Sequence[str]) -> bool:
         return False
 
 
+def _legal_names() -> Sequence[str]:
+    paths = sorted(BIN.iterdir(), key=lambda p: tuple(map(strxfrm, p.parts)))
+    names = tuple(chain((p.name for p in paths), map(str, paths)))
+    return names
+
+
 def _parse_args() -> Tuple[Namespace, Sequence[str]]:
     parser = ArgumentParser()
     parser.add_argument(
         "name",
-        choices=sorted(bin for path in BIN.iterdir() for bin in (str(path), path.name)),
+        choices=_legal_names(),
     )
     return parser.parse_known_args()
 
