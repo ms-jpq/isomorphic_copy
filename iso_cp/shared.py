@@ -1,15 +1,14 @@
 from asyncio.subprocess import PIPE, create_subprocess_exec
-from typing import Optional, Iterable
-
 from shlex import quote
+from typing import Iterable, Optional, cast
+
 
 def join(cmds: Iterable[str]) -> str:
     return " ".join(map(quote, cmds))
 
 
-async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> None:
+async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
     proc = await create_subprocess_exec(prog, *args, stdin=PIPE)
     await proc.communicate(stdin)
-    if proc.returncode != 0:
-        exit(proc.returncode)
+    return cast(int, proc.returncode)
 
