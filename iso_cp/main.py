@@ -19,12 +19,13 @@ def _path_mask() -> None:
 
 
 def _link() -> None:
+    python = Path(executable).resolve()
     try:
-        if readlink(EXEC) != executable:
+        if Path(readlink(EXEC)) != python:
             EXEC.unlink(missing_ok=True)
-            EXEC.symlink_to(executable)
+            EXEC.symlink_to(python)
     except FileNotFoundError:
-        EXEC.symlink_to(executable)
+        EXEC.symlink_to(python)
 
 
 def _is_copy(name: str, args: Sequence[str]) -> bool:
