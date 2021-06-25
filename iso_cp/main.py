@@ -35,7 +35,7 @@ def _is_paste(name: str, args: Sequence[str]) -> bool:
 
 def _parse_args() -> Tuple[Namespace, Sequence[str]]:
     parser = ArgumentParser()
-    parser.add_argument("name", choices=tuple(bin.name for bin in BIN.iterdir()))
+    parser.add_argument("name", choices=sorted(bin.name for bin in BIN.iterdir()))
     return parser.parse_known_args()
 
 
