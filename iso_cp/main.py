@@ -1,12 +1,13 @@
 from argparse import ArgumentParser, Namespace
 from asyncio import create_task, sleep
+from contextlib import asynccontextmanager
 from itertools import chain
 from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
 from pathlib import Path
 from signal import SIGKILL
 from sys import executable
-from typing import Sequence, Tuple
+from typing import AsyncIterator, Sequence, Tuple
 
 from .consts import BIN, EXEC
 from .copy import copy
@@ -15,11 +16,21 @@ from .paste import paste
 from .remote_daemon import r_daemon
 
 
-async def _suicide() -> None:
-    while True:
-        if getppid() == 1:
-            kill(getpid(), SIGKILL)
-        await sleep(1)
+@asynccontextmanager
+async def _suicide() -> AsyncIterator[None]:
+    async def cont() -> None:
+        while True:
+            if getppid() == 1:
+                kill(getpid(), SIGKILL)
+            await sleep(1)
+
+    t = None
+    try:
+        t = create_task(cont())
+        yield None
+    finally:
+        if t:
+            t.cancel()
 
 
 def _path_mask() -> None:
@@ -75,15 +86,15 @@ async def main() -> int:
     name = Path(ns.name).name
     local = "ISOCP_USE_FILE" in environ
 
-    create_task(_suicide())
-    if name in {"cssh", "cdocker"}:
-        return await l_daemon(local, name=name, args=args)
-    elif name == "csshd":
-        return await r_daemon()
-    elif _is_paste(name, args=args):
-        return await paste(local, args=args)
-    elif _is_copy(name, args=args):
-        return await copy(local, args=args, data=None)
-    else:
-        assert False
+    async with _suicide():
+        if name in {"cssh", "cdocker"}:
+            return await l_daemon(local, name=name, args=args)
+        elif name == "csshd":
+            return await r_daemon()
+        elif _is_paste(name, args=args):
+            return await paste(local, args=args)
+        elif _is_copy(name, args=args):
+            return await copy(local, args=args, data=None)
+        else:
+            assert False
 
