@@ -1,8 +1,10 @@
 from argparse import ArgumentParser, Namespace
+from asyncio import create_task, sleep
 from itertools import chain
 from locale import strxfrm
-from os import environ, pathsep, readlink
+from os import environ, getpid, getppid, kill, pathsep, readlink
 from pathlib import Path
+from signal import SIGKILL
 from sys import executable
 from typing import Sequence, Tuple
 
@@ -11,6 +13,13 @@ from .copy import copy
 from .local_daemon import l_daemon
 from .paste import paste
 from .remote_daemon import r_daemon
+
+
+async def _suicide() -> None:
+    while True:
+        if getppid() == 1:
+            kill(getpid(), SIGKILL)
+        await sleep(1)
 
 
 def _path_mask() -> None:
@@ -66,6 +75,7 @@ async def main() -> int:
     name = Path(ns.name).name
     local = "ISOCP_USE_FILE" in environ
 
+    create_task(_suicide())
     if name in {"cssh", "cdocker"}:
         return await l_daemon(local, name=name, args=args)
     elif name == "csshd":
