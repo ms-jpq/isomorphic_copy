@@ -1,6 +1,5 @@
 from argparse import ArgumentParser, Namespace
-from asyncio import Task, create_task, sleep
-from contextlib import AbstractAsyncContextManager
+from asyncio import Task, ensure_future, sleep
 from itertools import chain
 from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
@@ -16,7 +15,7 @@ from .paste import paste
 from .remote_daemon import r_daemon
 
 
-class _Suicide(AbstractAsyncContextManager):
+class _Suicide:
     def __init__(self) -> None:
         self._t: Optional[Task] = None
 
@@ -27,7 +26,7 @@ class _Suicide(AbstractAsyncContextManager):
             await sleep(1)
 
     async def __aenter__(self) -> None:
-        self._t = create_task(self._suicide())
+        self._t = ensure_future(self._suicide())
 
     async def __aexit__(self, *_: Any) -> None:
         if self._t:
