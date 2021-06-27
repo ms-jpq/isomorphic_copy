@@ -1,13 +1,13 @@
 from argparse import ArgumentParser, Namespace
-from asyncio import create_task, sleep
-from contextlib import asynccontextmanager
+from asyncio import Task, create_task, sleep
+from contextlib import AbstractAsyncContextManager
 from itertools import chain
 from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
 from pathlib import Path
 from signal import SIGKILL
 from sys import executable
-from typing import AsyncIterator, Sequence, Tuple
+from typing import Any, Optional, Sequence, Tuple
 
 from .consts import BIN, EXEC
 from .copy import copy
@@ -16,21 +16,22 @@ from .paste import paste
 from .remote_daemon import r_daemon
 
 
-@asynccontextmanager
-async def _suicide() -> AsyncIterator[None]:
-    async def cont() -> None:
+class _Suicide(AbstractAsyncContextManager):
+    def __init__(self) -> None:
+        self._t: Optional[Task] = None
+
+    async def _suicide(self) -> None:
         while True:
             if getppid() == 1:
                 kill(getpid(), SIGKILL)
             await sleep(1)
 
-    t = None
-    try:
-        t = create_task(cont())
-        yield None
-    finally:
-        if t:
-            t.cancel()
+    async def __aenter__(self) -> None:
+        self._t = create_task(self._suicide())
+
+    async def __aexit__(self, *_: Any) -> None:
+        if self._t:
+            self._t.cancel()
 
 
 def _path_mask() -> None:
@@ -86,7 +87,7 @@ async def main() -> int:
     name = Path(ns.name).name
     local = "ISOCP_USE_FILE" in environ
 
-    async with _suicide():
+    async with _Suicide():
         if name in {"cssh", "cdocker"}:
             return await l_daemon(local, name=name, args=args)
         elif name == "csshd":
