@@ -46,7 +46,7 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> None:
     log.info("%s", dedent(msg))
 
     while True:
-        if proc.returncode:
+        if proc.returncode is not None:
             msg = f"Exited - {proc.returncode}"
             log.warn("%s", msg)
             break
