@@ -28,6 +28,7 @@ async def _rcp(data: bytes) -> int:
         writer.write(data)
         writer.write(NUL)
         await writer.drain()
+
     return 0
 
 
@@ -60,4 +61,3 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
 
     cum = sum(await gather(*cont()))
     return cum
-

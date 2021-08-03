@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, Namespace
-from asyncio import Task, ensure_future, sleep
+from asyncio import Future, ensure_future, sleep
 from itertools import chain
 from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
@@ -17,7 +17,7 @@ from .remote_daemon import r_daemon
 
 class _Suicide:
     def __init__(self) -> None:
-        self._t: Optional[Task] = None
+        self._t: Optional[Future] = None
 
     async def _suicide(self) -> None:
         while True:
@@ -31,6 +31,8 @@ class _Suicide:
     async def __aexit__(self, *_: Any) -> None:
         if self._t:
             self._t.cancel()
+            while not self._t.done():
+                await sleep(0)
 
 
 def _path_mask() -> None:
@@ -97,4 +99,3 @@ async def main() -> int:
             return await copy(local, args=args, data=None)
         else:
             assert False
-

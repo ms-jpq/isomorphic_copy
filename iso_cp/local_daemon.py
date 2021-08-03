@@ -24,6 +24,7 @@ def _tunnel_cmd(name: str) -> Tuple[Sequence[str], Sequence[str]]:
 
 def _tunneling_prog() -> str:
     canonical = BIN / "csshd"
+
     try:
         rel_path = canonical.relative_to(Path.home())
     except ValueError:
@@ -72,4 +73,3 @@ async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
         await _daemon(local, name=name, args=args)
         print("\a", end="", file=stderr)
         await sleep(1)
-

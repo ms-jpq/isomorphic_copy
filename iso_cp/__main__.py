@@ -1,22 +1,30 @@
-from asyncio import all_tasks, gather, get_event_loop
+import sys
+from asyncio import get_event_loop
+from sys import exit
+from typing import Awaitable, TypeVar
+
+T = TypeVar("T")
 
 from .main import main
 
-loop = None
-try:
-    loop = get_event_loop()
-    try:
-        code = loop.run_until_complete(main())
-    except KeyboardInterrupt:
-        exit(130)
-    else:
-        exit(code)
-finally:
-    if loop:
+if sys.version_info > (3, 6):
+    from asyncio import run
+else:
+
+    def run(co: Awaitable[T]) -> T:
+        loop = get_event_loop()
         try:
-            tasks = all_tasks()
-            for task in tasks:
-                task.cancel()
-            loop.run_until_complete(gather(*tasks, return_exceptions=True))
+            return loop.run_until_complete(co)
         finally:
-            loop.close()
+            try:
+                loop.run_until_complete(loop.shutdown_asyncgens())
+            finally:
+                loop.close()
+
+
+try:
+    code = run(main())
+except KeyboardInterrupt:
+    exit(130)
+else:
+    exit(code)

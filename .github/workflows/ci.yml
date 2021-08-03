@@ -31,4 +31,4 @@ jobs:
         run: pip install -U mypy
 
       - name: Lint
-        run: ./lint.sh
+        run: mypy -- .
