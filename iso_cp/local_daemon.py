@@ -1,12 +1,14 @@
-from asyncio import IncompleteReadError, StreamReader, sleep
+from asyncio import FIRST_COMPLETED, IncompleteReadError, sleep, wait
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
+from asyncio.tasks import create_task
+from contextlib import suppress
 from datetime import datetime
 from os import sep
 from pathlib import Path
 from shlex import quote
 from sys import stderr
 from textwrap import dedent
-from typing import Sequence, Tuple, cast
+from typing import Sequence, Tuple
 
 from .consts import BIN, NUL, TIME_FMT
 from .copy import copy
@@ -33,12 +35,12 @@ def _tunneling_prog() -> str:
         return '"$HOME"' + quote(str(Path(sep) / rel_path))
 
 
-async def _daemon(local: bool, name: str, args: Sequence[str]) -> None:
+async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     prev, post = _tunnel_cmd(name)
     prog = _tunneling_prog()
     exe = (*prev, *args, *post, "sh", "-c", prog)
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
-    stdout = cast(StreamReader, proc.stdout)
+    p_done = create_task(proc.wait())
 
     msg = f"""
     Establishing link via:
@@ -46,30 +48,30 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> None:
     """
     log.info("%s", dedent(msg))
 
+    assert proc.stdout
     while True:
-        if proc.returncode is not None:
-            msg = f"Exited - {proc.returncode}"
-            log.warn("%s", msg)
-            break
-        else:
-            try:
-                data = await stdout.readuntil(NUL)
-            except IncompleteReadError:
-                break
-            else:
-                time = datetime.now().strftime(TIME_FMT)
+        p_data = create_task(proc.stdout.readuntil(NUL))
+        await wait((p_done, p_data), return_when=FIRST_COMPLETED)
+
+        if p_data.done():
+            with suppress(IncompleteReadError):
+                data = await p_data
                 await copy(local, args=args, data=data[:-1])
 
+                time = datetime.now().strftime(TIME_FMT)
                 msg = f"""
-
                 -- RECV --
                 {time}
                 """
                 log.info("%s", dedent(msg))
 
+        if p_done.done():
+            return await proc.wait()
+
 
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
     while True:
-        await _daemon(local, name=name, args=args)
+        code = await _daemon(local, name=name, args=args)
+        log.warn("%s", f"Exited - {code}")
         print("\a", end="", file=stderr)
         await sleep(1)

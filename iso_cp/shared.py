@@ -1,7 +1,7 @@
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import suppress
 from shlex import quote
-from typing import Iterable, Optional, cast
+from typing import Iterable, Optional
 
 
 def join(cmds: Iterable[str]) -> str:
@@ -16,8 +16,8 @@ async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
     )
     try:
         await proc.communicate(stdin)
+        return await proc.wait()
     finally:
         with suppress(ProcessLookupError):
-            await proc.wait()
-
-    return cast(int, proc.returncode)
+            proc.kill()
+        await proc.wait()
