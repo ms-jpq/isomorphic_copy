@@ -1,6 +1,5 @@
-from asyncio import FIRST_COMPLETED, IncompleteReadError, sleep, wait
+from asyncio import FIRST_COMPLETED, IncompleteReadError, ensure_future, sleep, wait
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
-from asyncio.tasks import create_task
 from contextlib import suppress
 from datetime import datetime
 from os import sep
@@ -40,7 +39,7 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     prog = _tunneling_prog()
     exe = (*prev, *args, *post, "sh", "-c", prog)
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
-    p_done = create_task(proc.wait())
+    p_done = ensure_future(proc.wait())
 
     msg = f"""
     Establishing link via:
@@ -50,7 +49,7 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
 
     assert proc.stdout
     while True:
-        p_data = create_task(proc.stdout.readuntil(NUL))
+        p_data = ensure_future(proc.stdout.readuntil(NUL))
         await wait((p_done, p_data), return_when=FIRST_COMPLETED)
 
         if p_data.done():
