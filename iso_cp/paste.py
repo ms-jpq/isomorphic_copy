@@ -1,4 +1,4 @@
-from asyncio.events import get_event_loop
+from contextlib import suppress
 from itertools import chain
 from os import environ
 from shutil import which
@@ -8,7 +8,7 @@ from typing import Sequence
 
 from .consts import WRITE_PATH
 from .logging import log
-from .shared import call
+from .shared import call, run_in_executor
 
 
 async def paste(local: bool, args: Sequence[str]) -> int:
@@ -29,13 +29,13 @@ async def paste(local: bool, args: Sequence[str]) -> int:
     elif local:
 
         def cont() -> int:
-            if WRITE_PATH.exists():
+            with suppress(FileNotFoundError):
                 data = WRITE_PATH.read_bytes()
                 stdout.buffer.write(data)
                 stdout.buffer.flush()
             return 0
 
-        return await get_event_loop().run_in_executor(None, cont)
+        return await run_in_executor(cont)
 
     else:
         msg = """

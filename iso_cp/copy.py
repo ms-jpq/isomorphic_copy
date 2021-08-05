@@ -1,4 +1,4 @@
-from asyncio import gather, get_event_loop, open_unix_connection
+from asyncio import gather, open_unix_connection
 from os import environ, sep
 from pathlib import Path
 from shutil import which
@@ -6,7 +6,7 @@ from sys import stdin
 from typing import Awaitable, Iterator, Optional, Sequence
 
 from .consts import NUL, SOCKET_PATH, WRITE_PATH
-from .shared import call
+from .shared import call, run_in_executor
 
 
 def _is_remote() -> bool:
@@ -33,8 +33,9 @@ async def _rcp(data: bytes) -> int:
 
 
 async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
+    content = data or (await run_in_executor(stdin.read)).encode()
+
     def c1() -> Iterator[Awaitable[int]]:
-        content = data or stdin.read().encode()
         if _is_remote():
             yield _rcp(content)
 
@@ -57,7 +58,7 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
                 WRITE_PATH.write_bytes(content)
                 return 0
 
-            yield get_event_loop().run_in_executor(None, c2)
+            yield run_in_executor(c2)
 
     cum = sum(await gather(*c1()))
     return cum
