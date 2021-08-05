@@ -11,5 +11,9 @@ async def r_daemon() -> int:
         stdout.buffer.flush()
 
     server = await start_unix_server(handler, str(SOCKET_PATH))
-    await server.wait_closed()
+    try:
+        await server.wait_closed()
+    finally:
+        server.close()
+        await server.wait_closed()
     return 1

@@ -46,31 +46,36 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     {join(exe)}
     """
     log.info("%s", dedent(msg))
+    try:
+        assert proc.stdout
+        while True:
+            p_data = ensure_future(proc.stdout.readuntil(NUL))
+            await wait((p_done, p_data), return_when=FIRST_COMPLETED)
 
-    assert proc.stdout
-    while True:
-        p_data = ensure_future(proc.stdout.readuntil(NUL))
-        await wait((p_done, p_data), return_when=FIRST_COMPLETED)
+            if p_data.done():
+                with suppress(IncompleteReadError):
+                    data = await p_data
+                    await copy(local, args=args, data=data[:-1])
 
-        if p_data.done():
-            with suppress(IncompleteReadError):
-                data = await p_data
-                await copy(local, args=args, data=data[:-1])
+                    time = datetime.now().strftime(TIME_FMT)
+                    msg = f"""
+                    -- RECV --
+                    {time}
+                    """
+                    log.info("%s", dedent(msg))
 
-                time = datetime.now().strftime(TIME_FMT)
-                msg = f"""
-                -- RECV --
-                {time}
-                """
-                log.info("%s", dedent(msg))
+            if p_done.done():
+                return await proc.wait()
 
-        if p_done.done():
-            return await proc.wait()
+    finally:
+        with suppress(ProcessLookupError):
+            proc.kill()
+        await proc.wait()
 
 
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
     while True:
         code = await _daemon(local, name=name, args=args)
-        log.warn("%s", f"Exited - {code}")
-        print("\a", end="", file=stderr)
+        log.warn("%s", f"Exited - $? {code}")
+        print("\a", end="", file=stderr, flush=True)
         await sleep(1)
