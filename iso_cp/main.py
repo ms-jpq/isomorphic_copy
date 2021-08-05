@@ -20,8 +20,9 @@ class _Suicide:
         self._t: Optional[Future] = None
 
     async def _suicide(self) -> None:
+        ppid = getppid()
         while True:
-            if getppid() == 1:
+            if getppid() != ppid:
                 kill(getpid(), SIGKILL)
             await sleep(1)
 
