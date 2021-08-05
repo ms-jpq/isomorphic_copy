@@ -1,4 +1,4 @@
-from asyncio import gather, open_unix_connection
+from asyncio import gather, open_unix_connection, sleep
 from os import environ, sep
 from pathlib import Path
 from shutil import which
@@ -32,10 +32,6 @@ async def _rcp(data: bytes) -> int:
     return 0
 
 
-async def _zero() -> int:
-    return 0
-
-
 async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
     def cont() -> Iterator[Awaitable[int]]:
         content = data or stdin.read().encode()
@@ -57,7 +53,7 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
 
         elif local:
             WRITE_PATH.write_bytes(content)
-            yield _zero()
+            yield sleep(0, 0)
 
     cum = sum(await gather(*cont()))
     return cum
