@@ -1,4 +1,4 @@
-from asyncio import gather, get_running_loop, open_unix_connection
+from asyncio import gather, get_event_loop, open_unix_connection
 from os import environ, sep
 from pathlib import Path
 from shutil import which
@@ -57,7 +57,7 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
                 WRITE_PATH.write_bytes(content)
                 return 0
 
-            yield get_running_loop().run_in_executor(None, c2)
+            yield get_event_loop().run_in_executor(None, c2)
 
     cum = sum(await gather(*c1()))
     return cum

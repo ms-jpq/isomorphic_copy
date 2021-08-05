@@ -1,4 +1,4 @@
-from asyncio.events import get_running_loop
+from asyncio.events import get_event_loop
 from itertools import chain
 from os import environ
 from shutil import which
@@ -35,7 +35,7 @@ async def paste(local: bool, args: Sequence[str]) -> int:
                 stdout.buffer.flush()
             return 0
 
-        return await get_running_loop().run_in_executor(None, cont)
+        return await get_event_loop().run_in_executor(None, cont)
 
     else:
         msg = """
