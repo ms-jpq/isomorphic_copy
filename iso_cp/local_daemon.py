@@ -18,7 +18,7 @@ from .shared import join
 def _tunnel_cmd(name: str) -> Tuple[Sequence[str], Sequence[str]]:
     lookup = {
         "cssh": (("ssh", "-T"), ()),
-        "cdocker": (("docker", "exec"), ()),
+        "cdocker": (("docker", "exec"), ("sh", "-c")),
     }
     return lookup[name]
 
@@ -37,7 +37,7 @@ def _tunneling_prog() -> str:
 async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     prev, post = _tunnel_cmd(name)
     prog = _tunneling_prog()
-    exe = (*prev, *args, *post, "sh", "-c", prog)
+    exe = (*prev, *args, *post, prog)
     proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
     p_done = ensure_future(proc.wait())
 
