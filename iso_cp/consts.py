@@ -11,4 +11,3 @@ BIN = _TOP_LV / "bin"
 EXEC = _TMP / "python"
 SOCKET_PATH = _TMP / "cp.socket"
 WRITE_PATH = _TMP / "clipboard.txt"
-

@@ -13,4 +13,3 @@ async def r_daemon() -> int:
     server = await start_unix_server(handler, str(SOCKET_PATH))
     await server.wait_closed()
     return 1
-

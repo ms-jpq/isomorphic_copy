@@ -1,3 +1,4 @@
+from asyncio.events import get_running_loop
 from itertools import chain
 from os import environ
 from shutil import which
@@ -19,19 +20,23 @@ async def paste(local: bool, args: Sequence[str]) -> int:
 
     elif which("xclip") and "DISPLAY" in environ:
         xargs = chain(args, ("-out",)) if {*args}.isdisjoint({"-o", "-out"}) else args
-        # primary clipboard ???
+        # TODO -- primary clipboard ???
         return await call("xclip", *xargs, "-selection", "clipboard")
 
     elif "TMUX" in environ:
         return await call("tmux", "save-buffer", "-")
 
     elif local:
-        if WRITE_PATH.exists():
-            data = WRITE_PATH.read_bytes()
-            stdout.buffer.write(data)
-            stdout.buffer.flush()
 
-        return 0
+        def cont() -> int:
+            if WRITE_PATH.exists():
+                data = WRITE_PATH.read_bytes()
+                stdout.buffer.write(data)
+                stdout.buffer.flush()
+            return 0
+
+        return await get_running_loop().run_in_executor(None, cont)
+
     else:
         msg = """
         ⚠️  No system clipboard detected ⚠️ 
@@ -40,4 +45,3 @@ async def paste(local: bool, args: Sequence[str]) -> int:
         """
         log.critical("%s", dedent(msg))
         return 1
-

@@ -1,4 +1,4 @@
-from asyncio import gather, open_unix_connection, sleep
+from asyncio import gather, get_running_loop, open_unix_connection
 from os import environ, sep
 from pathlib import Path
 from shutil import which
@@ -33,7 +33,7 @@ async def _rcp(data: bytes) -> int:
 
 
 async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
-    def cont() -> Iterator[Awaitable[int]]:
+    def c1() -> Iterator[Awaitable[int]]:
         content = data or stdin.read().encode()
         if _is_remote():
             yield _rcp(content)
@@ -52,8 +52,12 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
             yield call("xclip", *args, "-selection", "primary", stdin=content)
 
         elif local:
-            WRITE_PATH.write_bytes(content)
-            yield sleep(0, 0)
 
-    cum = sum(await gather(*cont()))
+            def c2() -> int:
+                WRITE_PATH.write_bytes(content)
+                return 0
+
+            yield get_running_loop().run_in_executor(None, c2)
+
+    cum = sum(await gather(*c1()))
     return cum
