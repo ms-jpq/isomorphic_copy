@@ -31,7 +31,7 @@ def _tunneling_prog() -> str:
     except ValueError:
         return quote(str(canonical))
     else:
-        return '"$HOME"' + quote(str(Path(sep) / rel_path))
+        return 'exec "$HOME"' + quote(str(Path(sep) / rel_path))
 
 
 async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
