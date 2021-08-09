@@ -38,7 +38,9 @@ def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
 
 async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     cmds = _tunnel_cmd(name, args=args)
-    proc = await create_subprocess_exec(*cmds, stdin=DEVNULL, stdout=PIPE)
+    proc = await create_subprocess_exec(
+        *cmds, start_new_session=True, stdin=DEVNULL, stdout=PIPE
+    )
     p_done = ensure_future(proc.wait())
 
     msg = f"""
