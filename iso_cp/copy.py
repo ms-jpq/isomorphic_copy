@@ -1,15 +1,13 @@
 import sys
 from asyncio import gather, open_unix_connection
-from contextlib import suppress
 from os import environ, sep
 from pathlib import Path
 from shutil import which
 from sys import stdin
-from tempfile import NamedTemporaryFile
 from typing import Awaitable, Iterator, Optional, Sequence
 
-from .consts import NUL, SOCKET_PATH, TMP, WRITE_PATH
-from .shared import call, run_in_executor
+from .consts import NUL, SOCKET_PATH, WRITE_PATH
+from .shared import call, run_in_executor, safe_write
 
 
 def _is_remote() -> bool:
@@ -60,10 +58,7 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
         elif local:
 
             def c2() -> int:
-                with suppress(FileNotFoundError), NamedTemporaryFile(dir=TMP) as fd:
-                    fd.write(content)
-                    fd.flush()
-                    Path(fd.name).replace(WRITE_PATH)
+                safe_write(WRITE_PATH, data=content)
                 return 0
 
             yield run_in_executor(c2)

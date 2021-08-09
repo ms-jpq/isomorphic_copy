@@ -9,5 +9,7 @@ TMP = _TOP_LV / "tmp"
 
 BIN = _TOP_LV / "bin"
 EXEC = TMP / "python"
+
+UID_PATH = TMP / "uid"
 SOCKET_PATH = TMP / "cp.socket"
 WRITE_PATH = TMP / "clipboard.txt"

@@ -13,3 +13,4 @@ def log_exc() -> Iterator[None]:
         yield None
     except Exception as e:
         log.exception("%s", e)
+        raise

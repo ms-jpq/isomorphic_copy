@@ -7,13 +7,15 @@ from pathlib import Path
 from signal import SIGKILL
 from sys import executable
 from typing import Any, Optional, Sequence, Tuple
+from uuid import uuid4
 
-from .consts import BIN, EXEC
+from .consts import BIN, EXEC, UID_PATH
 from .copy import copy
 from .local_daemon import l_daemon
 from .logging import log_exc
 from .paste import paste
 from .remote_daemon import r_daemon
+from .shared import run_in_executor, safe_write
 
 
 class _Suicide:
@@ -22,9 +24,16 @@ class _Suicide:
 
     async def _suicide(self) -> None:
         with log_exc():
-            ppid = getppid()
+            b4, ppid = uuid4().bytes, getppid()
+
+            def cont() -> None:
+                safe_write(UID_PATH, data=b4)
+
+            await run_in_executor(cont)
+
             while True:
-                if getppid() != ppid:
+                b = await run_in_executor(UID_PATH.read_bytes)
+                if b != b4 or getppid() != ppid:
                     kill(getpid(), SIGKILL)
                 await sleep(1)
 
