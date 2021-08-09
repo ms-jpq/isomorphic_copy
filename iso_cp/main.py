@@ -11,6 +11,7 @@ from typing import Any, Optional, Sequence, Tuple
 from .consts import BIN, EXEC
 from .copy import copy
 from .local_daemon import l_daemon
+from .logging import log_exc
 from .paste import paste
 from .remote_daemon import r_daemon
 
@@ -20,20 +21,22 @@ class _Suicide:
         self._t: Optional[Future] = None
 
     async def _suicide(self) -> None:
-        ppid = getppid()
-        while True:
-            if getppid() != ppid:
-                kill(getpid(), SIGKILL)
-            await sleep(1)
+        with log_exc():
+            ppid = getppid()
+            while True:
+                if getppid() != ppid:
+                    kill(getpid(), SIGKILL)
+                await sleep(1)
 
     async def __aenter__(self) -> None:
         self._t = ensure_future(self._suicide())
 
     async def __aexit__(self, *_: Any) -> None:
-        if self._t:
-            self._t.cancel()
-            while not self._t.done():
-                await sleep(0)
+        with log_exc():
+            if self._t:
+                self._t.cancel()
+                while not self._t.done():
+                    await sleep(0)
 
 
 def _path_mask() -> None:
