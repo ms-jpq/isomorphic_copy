@@ -9,8 +9,12 @@ from .shared import run_in_executor
 async def r_daemon() -> int:
     async def handler(reader: StreamReader, _: StreamWriter) -> None:
         data = await reader.readuntil(NUL)
-        await run_in_executor(stdout.buffer.write, data)
-        await run_in_executor(stdout.buffer.flush)
+
+        def cont() -> None:
+            stdout.buffer.write(data)
+            stdout.buffer.flush()
+
+        await run_in_executor(cont)
 
     server = await start_unix_server(handler, str(SOCKET_PATH))
 
