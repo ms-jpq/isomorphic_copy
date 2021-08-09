@@ -1,3 +1,4 @@
+import sys
 from asyncio import StreamReader, StreamWriter, start_unix_server
 from sys import stdout
 
@@ -12,9 +13,15 @@ async def r_daemon() -> int:
         await run_in_executor(stdout.buffer.flush)
 
     server = await start_unix_server(handler, str(SOCKET_PATH))
-    try:
-        await server.wait_closed()
-    finally:
-        server.close()
-        await server.wait_closed()
+
+    if sys.version_info > (3, 7):
+        async with server:
+            await server.serve_forever()
+    else:
+        try:
+            await server.wait_closed()
+        finally:
+            server.close()
+            await server.wait_closed()
+
     return 1
