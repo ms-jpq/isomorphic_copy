@@ -38,7 +38,7 @@ async def _rcp(data: bytes) -> int:
 
 
 async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
-    content = data or await run_in_executor(stdin.buffer.read)
+    content = data or await run_in_executor(stdin.buffer.read) or b""
 
     def c1() -> Iterator[Awaitable[int]]:
         if _is_remote():
