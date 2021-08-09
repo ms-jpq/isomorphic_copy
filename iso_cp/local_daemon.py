@@ -12,7 +12,7 @@ from typing import Sequence
 from .consts import BIN, NUL, TIME_FMT
 from .copy import copy
 from .logging import log
-from .shared import join
+from .shared import join, kill_children
 
 
 def _tunneling_prog() -> str:
@@ -70,7 +70,7 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
 
     finally:
         with suppress(ProcessLookupError):
-            proc.kill()
+            kill_children(proc.pid)
         await proc.wait()
 
 

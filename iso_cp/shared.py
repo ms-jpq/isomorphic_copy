@@ -18,6 +18,10 @@ def join(cmds: Iterable[str]) -> str:
     return " ".join(map(quote, cmds))
 
 
+def kill_children(pid: int) -> None:
+    killpg(getpgid(pid), SIGKILL)
+
+
 async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
     proc = await create_subprocess_exec(
         prog,
@@ -30,7 +34,7 @@ async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
         return await proc.wait()
     finally:
         with suppress(ProcessLookupError):
-            killpg(getpgid(proc.pid), SIGKILL)
+            kill_children(proc.pid)
         await proc.wait()
 
 
