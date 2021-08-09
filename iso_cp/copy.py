@@ -22,14 +22,15 @@ def _is_remote() -> bool:
 
 async def _rcp(data: bytes) -> int:
     try:
-        conn = await open_unix_connection(str(SOCKET_PATH))
+        _, writer = await open_unix_connection(str(SOCKET_PATH))
     except (FileNotFoundError, ConnectionRefusedError):
         pass
     else:
-        _, writer = conn
         writer.write(data)
         writer.write(NUL)
         await writer.drain()
+        writer.close()
+        await writer.wait_closed()
 
     return 0
 
