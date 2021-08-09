@@ -7,7 +7,7 @@ T = TypeVar("T")
 
 from .main import main
 
-if sys.version_info > (3, 6):
+if sys.version_info > (3, 7):
     from asyncio import run
 else:
 

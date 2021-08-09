@@ -9,7 +9,7 @@ RELEASE="$1"
 IMAGE="msjpq/isomorphic-copy:$RELEASE"
 
 
-docker build -t "$IMAGE" . -f "docker/$RELEASE/Dockerfile"
+docker buildx build -t "$IMAGE" . -f "docker/$RELEASE/Dockerfile"
 
 
 if [[ $# -gt 1 ]]
