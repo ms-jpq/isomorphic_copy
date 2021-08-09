@@ -47,7 +47,7 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
         if which("pbcopy"):
             yield call("pbcopy", stdin=content)
 
-        if which("wl-copy") and "WAYLAND_DISPLAY" in environ:
+        elif which("wl-copy") and "WAYLAND_DISPLAY" in environ:
             yield call("wl-copy", stdin=content)
 
         elif which("xclip") and "DISPLAY" in environ:
