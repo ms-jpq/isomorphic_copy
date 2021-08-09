@@ -23,7 +23,7 @@ async def paste(local: bool, args: Sequence[str]) -> int:
         # TODO -- primary clipboard ???
         return await call("xclip", *xargs, "-selection", "clipboard")
 
-    elif "TMUX" in environ:
+    elif which("tmux") and "TMUX" in environ:
         return await call("tmux", "save-buffer", "-")
 
     elif local:
