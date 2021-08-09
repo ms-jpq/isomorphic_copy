@@ -39,7 +39,7 @@ async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
         if _is_remote():
             yield _rcp(content)
 
-        if "TMUX" in environ:
+        if which("tmux") and "TMUX" in environ:
             yield call("tmux", "load-buffer", "-", stdin=content)
 
         if which("pbcopy"):
