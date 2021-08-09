@@ -1,3 +1,4 @@
+import sys
 from asyncio import gather, open_unix_connection
 from contextlib import suppress
 from os import environ, sep
@@ -30,7 +31,8 @@ async def _rcp(data: bytes) -> int:
         writer.write(NUL)
         await writer.drain()
         writer.close()
-        await writer.wait_closed()
+        if sys.version_info > (3, 7):
+            await writer.wait_closed()
 
     return 0
 
