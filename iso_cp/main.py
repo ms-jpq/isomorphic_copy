@@ -5,8 +5,8 @@ from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
 from pathlib import Path
 from signal import SIGKILL
-from sys import executable
-from typing import Any, Optional, Sequence, Tuple
+from sys import executable, exit
+from typing import Any, Awaitable, NoReturn, Optional, Sequence, Tuple
 from uuid import uuid4
 
 from .consts import BIN, EXEC, UID_PATH
@@ -18,24 +18,42 @@ from .remote_daemon import r_daemon
 from .shared import run_in_executor, safe_write
 
 
+def _suicide() -> NoReturn:
+    kill(getpid(), SIGKILL)
+    exit()
+
+
+async def _s1() -> None:
+    ppid = getppid()
+    while True:
+        if getppid() != ppid:
+            _suicide()
+        await sleep(1)
+
+
+async def _s2() -> None:
+    b4 = uuid4().bytes
+
+    def cont() -> None:
+        safe_write(UID_PATH, data=b4)
+
+    await run_in_executor(cont)
+
+    while True:
+        b = await run_in_executor(UID_PATH.read_bytes)
+        if b != b4:
+            _suicide()
+        await sleep(1)
+
+
 class _Suicide:
-    def __init__(self) -> None:
+    def __init__(self, s: Awaitable[None]) -> None:
         self._t: Optional[Future] = None
+        self._s = s
 
     async def _suicide(self) -> None:
         with log_exc():
-            b4, ppid = uuid4().bytes, getppid()
-
-            def cont() -> None:
-                safe_write(UID_PATH, data=b4)
-
-            await run_in_executor(cont)
-
-            while True:
-                b = await run_in_executor(UID_PATH.read_bytes)
-                if b != b4 or getppid() != ppid:
-                    kill(getpid(), SIGKILL)
-                await sleep(1)
+            await self._s
 
     async def __aenter__(self) -> None:
         self._t = ensure_future(self._suicide())
@@ -101,9 +119,10 @@ async def main() -> int:
     name = Path(ns.name).name
     local = "ISOCP_USE_FILE" in environ
 
-    async with _Suicide():
+    async with _Suicide(_s1()):
         if name in {"cssh", "cdocker"}:
-            return await l_daemon(local, name=name, args=args)
+            async with _Suicide(_s2()):
+                return await l_daemon(local, name=name, args=args)
         elif name == "csshd":
             return await r_daemon()
         elif _is_paste(name, args=args):
