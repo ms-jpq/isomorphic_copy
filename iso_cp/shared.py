@@ -2,8 +2,10 @@ from asyncio import get_event_loop
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import suppress
 from functools import partial
+from os import getpgid, killpg
 from pathlib import Path
 from shlex import quote
+from signal import SIGKILL
 from tempfile import NamedTemporaryFile
 from typing import Any, Callable, Iterable, Optional, TypeVar
 
@@ -20,6 +22,7 @@ async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
     proc = await create_subprocess_exec(
         prog,
         *args,
+        start_new_session=True,
         stdin=PIPE if stdin else DEVNULL,
     )
     try:
@@ -27,7 +30,7 @@ async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
         return await proc.wait()
     finally:
         with suppress(ProcessLookupError):
-            proc.kill()
+            killpg(getpgid(proc.pid), SIGKILL)
         await proc.wait()
 
 
