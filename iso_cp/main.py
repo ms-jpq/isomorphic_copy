@@ -4,9 +4,9 @@ from itertools import chain
 from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
 from pathlib import Path
-from signal import SIGKILL
-from sys import executable, exit
-from typing import Any, Awaitable, NoReturn, Optional, Sequence, Tuple
+from signal import SIGTERM
+from sys import executable
+from typing import Any, Awaitable, Optional, Sequence, Tuple
 from uuid import uuid4
 
 from .consts import BIN, EXEC, UID_PATH
@@ -18,9 +18,8 @@ from .remote_daemon import r_daemon
 from .shared import run_in_executor, safe_write
 
 
-def _suicide() -> NoReturn:
-    kill(getpid(), SIGKILL)
-    exit()
+def _suicide() -> None:
+    kill(getpid(), SIGTERM)
 
 
 async def _s1() -> None:
