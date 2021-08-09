@@ -7,20 +7,12 @@ from pathlib import Path
 from shlex import quote
 from sys import stderr
 from textwrap import dedent
-from typing import Sequence, Tuple
+from typing import Sequence
 
 from .consts import BIN, NUL, TIME_FMT
 from .copy import copy
 from .logging import log
 from .shared import join
-
-
-def _tunnel_cmd(name: str) -> Tuple[Sequence[str], Sequence[str]]:
-    lookup = {
-        "cssh": (("ssh", "-T"), ()),
-        "cdocker": (("docker", "exec"), ("sh", "-c")),
-    }
-    return lookup[name]
 
 
 def _tunneling_prog() -> str:
@@ -34,18 +26,27 @@ def _tunneling_prog() -> str:
         return 'exec "$HOME"' + quote(str(Path(sep) / rel_path))
 
 
+def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
+    sh = _tunneling_prog()
+    if name == "cssh":
+        return ("ssh", "-T", *args, sh)
+    elif name == "cdocker":
+        return ("docker", "exec", *args, "sh", "-c", sh)
+    else:
+        assert False
+
+
 async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
-    prev, post = _tunnel_cmd(name)
-    prog = _tunneling_prog()
-    exe = (*prev, *args, *post, prog)
-    proc = await create_subprocess_exec(*exe, stdin=DEVNULL, stdout=PIPE)
+    cmds = _tunnel_cmd(name, args=args)
+    proc = await create_subprocess_exec(*cmds, stdin=DEVNULL, stdout=PIPE)
     p_done = ensure_future(proc.wait())
 
     msg = f"""
     Establishing link via:
-    {join(exe)}
+    {join(cmds)}
     """
     log.info("%s", dedent(msg))
+
     try:
         assert proc.stdout
         while True:
