@@ -30,7 +30,8 @@ async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
         stdin=PIPE if stdin else DEVNULL,
     )
     try:
-        await proc.communicate(stdin)
+        if stdin:
+            await proc.communicate(stdin)
         return await proc.wait()
     finally:
         with suppress(ProcessLookupError):
