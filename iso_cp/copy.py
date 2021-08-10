@@ -3,8 +3,7 @@ from asyncio import gather, open_unix_connection
 from os import environ, sep
 from pathlib import Path
 from shutil import which
-from sys import stdin
-from typing import Awaitable, Iterator, Optional, Sequence
+from typing import Awaitable, Iterator, Sequence
 
 from .consts import NUL, SOCKET_PATH, WRITE_PATH
 from .shared import call, run_in_executor, safe_write
@@ -35,30 +34,28 @@ async def _rcp(data: bytes) -> int:
     return 0
 
 
-async def copy(local: bool, args: Sequence[str], data: Optional[bytes]) -> int:
-    content = data or await run_in_executor(stdin.buffer.read) or b""
-
+async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
     def c1() -> Iterator[Awaitable[int]]:
         if _is_remote():
-            yield _rcp(content)
+            yield _rcp(data)
 
         if which("tmux") and "TMUX" in environ:
-            yield call("tmux", "load-buffer", "-", stdin=content)
+            yield call("tmux", "load-buffer", "-", stdin=data)
 
         if which("pbcopy"):
-            yield call("pbcopy", stdin=content)
+            yield call("pbcopy", stdin=data)
 
         elif which("wl-copy") and "WAYLAND_DISPLAY" in environ:
-            yield call("wl-copy", stdin=content)
+            yield call("wl-copy", stdin=data)
 
         elif which("xclip") and "DISPLAY" in environ:
-            yield call("xclip", *args, "-selection", "clipboard", stdin=content)
-            yield call("xclip", *args, "-selection", "primary", stdin=content)
+            yield call("xclip", *args, "-selection", "clipboard", stdin=data)
+            yield call("xclip", *args, "-selection", "primary", stdin=data)
 
         elif local:
 
             def c2() -> int:
-                safe_write(WRITE_PATH, data=content)
+                safe_write(WRITE_PATH, data=data)
                 return 0
 
             yield run_in_executor(c2)

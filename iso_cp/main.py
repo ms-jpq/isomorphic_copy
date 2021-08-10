@@ -5,7 +5,7 @@ from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
 from pathlib import Path
 from signal import SIGTERM
-from sys import executable
+from sys import executable, stdin
 from typing import Any, Awaitable, Optional, Sequence, Tuple
 from uuid import uuid4
 
@@ -127,6 +127,7 @@ async def main() -> int:
         elif _is_paste(name, args=args):
             return await paste(local, args=args)
         elif _is_copy(name, args=args):
-            return await copy(local, args=args, data=None)
+            data = await run_in_executor(stdin.buffer.read)
+            return await copy(local, args=args, data=data)
         else:
             assert False
