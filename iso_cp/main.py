@@ -119,6 +119,7 @@ async def main() -> int:
     local = "ISOCP_USE_FILE" in environ
 
     async with _Suicide(_s1()):
+        await sleep(0)
         if name in {"cssh", "cdocker"}:
             async with _Suicide(_s2()):
                 return await l_daemon(local, name=name, args=args)
