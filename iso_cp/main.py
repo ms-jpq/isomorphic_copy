@@ -55,10 +55,13 @@ class _Suicide:
             await self._s
 
     async def __aenter__(self) -> None:
-        self._t = ensure_future(self._suicide())
+        with log_exc():
+            self._t = ensure_future(self._suicide())
+            await sleep(0)
 
     async def __aexit__(self, *_: Any) -> None:
         with log_exc():
+            await sleep(0)
             if self._t:
                 self._t.cancel()
                 while not self._t.done():
@@ -119,7 +122,6 @@ async def main() -> int:
     local = "ISOCP_USE_FILE" in environ
 
     async with _Suicide(_s1()):
-        await sleep(0)
         if name in {"cssh", "cdocker"}:
             async with _Suicide(_s2()):
                 return await l_daemon(local, name=name, args=args)
