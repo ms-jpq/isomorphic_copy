@@ -126,7 +126,8 @@ async def main() -> int:
             async with _Suicide(_s2()):
                 return await l_daemon(local, name=name, args=args)
         elif name == "csshd":
-            return await r_daemon()
+            async with _Suicide(_s2()):
+                return await r_daemon()
         elif _is_paste(name, args=args):
             return await paste(local, args=args)
         elif _is_copy(name, args=args):
