@@ -9,7 +9,7 @@ from sys import executable, stdin
 from typing import Any, Awaitable, Optional, Sequence, Tuple
 from uuid import uuid4
 
-from .consts import BIN, EXEC, UID_PATH
+from .consts import BIN, EXEC, L_UID_PATH, R_UID_PATH
 from .copy import copy
 from .local_daemon import l_daemon
 from .logging import log_exc
@@ -30,16 +30,16 @@ async def _s1() -> None:
         await sleep(1)
 
 
-async def _s2() -> None:
+async def _s2(path: Path) -> None:
     b4 = uuid4().bytes
 
     def cont() -> None:
-        safe_write(UID_PATH, data=b4)
+        safe_write(path, data=b4)
 
     await run_in_executor(cont)
 
     while True:
-        b = await run_in_executor(UID_PATH.read_bytes)
+        b = await run_in_executor(L_UID_PATH.read_bytes)
         if b != b4:
             _suicide()
         await sleep(1)
@@ -123,10 +123,10 @@ async def main() -> int:
 
     async with _Suicide(_s1()):
         if name in {"cssh", "cdocker"}:
-            async with _Suicide(_s2()):
+            async with _Suicide(_s2(L_UID_PATH)):
                 return await l_daemon(local, name=name, args=args)
         elif name == "csshd":
-            async with _Suicide(_s2()):
+            async with _Suicide(_s2(R_UID_PATH)):
                 return await r_daemon()
         elif _is_paste(name, args=args):
             return await paste(local, args=args)
