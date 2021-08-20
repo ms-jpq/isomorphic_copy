@@ -33,13 +33,19 @@ async def _s1() -> None:
 async def _s2(path: Path) -> None:
     b4 = uuid4().bytes
 
-    def cont() -> None:
+    def c1() -> None:
         safe_write(path, data=b4)
 
-    await run_in_executor(cont)
+    await run_in_executor(c1)
+
+    def c2() -> bytes:
+        try:
+            return path.read_bytes()
+        except FileNotFoundError:
+            return b""
 
     while True:
-        b = await run_in_executor(L_UID_PATH.read_bytes)
+        b = await run_in_executor(c2)
         if b != b4:
             _suicide()
         await sleep(1)
