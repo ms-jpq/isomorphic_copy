@@ -42,9 +42,10 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
         *cmds, start_new_session=True, stdin=DEVNULL, stdout=PIPE
     )
     p_done = ensure_future(proc.wait())
+    time = datetime.now().strftime(TIME_FMT)
 
     msg = f"""
-    Establishing link via:
+    {time} | Establishing link via:
     {join(cmds)}
     """
     log.info("%s", dedent(msg))
