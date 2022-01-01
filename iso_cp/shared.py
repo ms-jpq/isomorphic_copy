@@ -45,7 +45,7 @@ async def run_in_executor(f: Callable[..., _T], *args: Any, **kwargs: Any) -> _T
 
 
 def safe_write(path: Path, data: bytes) -> None:
-    with suppress(FileNotFoundError), NamedTemporaryFile(dir=TMP) as fd:
+    with NamedTemporaryFile(dir=TMP, delete=False) as fd:
         fd.write(data)
-        fd.flush()
-        Path(fd.name).replace(path)
+
+    Path(fd.name).replace(path)
