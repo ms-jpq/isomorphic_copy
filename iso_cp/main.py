@@ -25,9 +25,11 @@ def _suicide() -> None:
 async def _s1() -> None:
     ppid = getppid()
     while True:
-        if getppid() != ppid:
+        cppid = getppid()
+        if cppid == 1 or cppid != ppid:
             _suicide()
-        await sleep(1)
+        else:
+            await sleep(1)
 
 
 async def _s2(path: Path) -> None:
