@@ -40,9 +40,11 @@ async def _osc52(tmux: bool, data: bytes) -> int:
     def cont() -> None:
         if tmux:
             stdout.buffer.write(b"\x1BPtmux;\x1B")
+
         stdout.buffer.write(b"\x1B]52;c;")
         stdout.buffer.write(b64encode(data))
         stdout.buffer.write(b"\a")
+
         if tmux:
             stdout.buffer.write(b"\x1B\\")
         stdout.buffer.flush()
