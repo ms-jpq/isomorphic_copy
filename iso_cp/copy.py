@@ -51,7 +51,8 @@ async def _osc52(tmux: bool, data: bytes) -> int:
             stderr.buffer.write(b"\x1B\\")
         stderr.buffer.flush()
 
-    await run_in_executor(cont)
+    if stderr.isatty():
+        await run_in_executor(cont)
     return 0
 
 
@@ -61,12 +62,10 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
 
         if _is_remote():
             yield _rcp(data)
+            yield _osc52(tmux, data=data)
 
         if tmux:
             yield call("tmux", "load-buffer", "-", stdin=data)
-
-        if stderr.isatty() and "SSH_TTY" in environ:
-            yield _osc52(tmux, data=data)
 
         if which("pbcopy"):
             yield call("pbcopy", stdin=data)
