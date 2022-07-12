@@ -41,14 +41,22 @@ async def _rcp(data: bytes) -> int:
 async def _osc52(tmux: bool, data: bytes) -> int:
     def cont() -> None:
         if tmux:
-            stderr.buffer.write(b"\x1BPtmux;\x1B")
+            stderr.buffer.write(b"\x1BPtmux;")
+
+        if tmux:
+            stderr.buffer.write(b"\x1B")
 
         stderr.buffer.write(b"\x1B]52;c;")
         stderr.buffer.write(b64encode(data))
-        stderr.buffer.write(b"\a")
 
         if tmux:
             stderr.buffer.write(b"\x1B\\")
+
+        stderr.buffer.write(b"\x1B\x9c")
+
+        if tmux:
+            stderr.buffer.write(b"\x1B\\")
+
         stderr.buffer.flush()
 
     if stderr.isatty():
