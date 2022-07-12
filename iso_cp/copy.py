@@ -40,20 +40,28 @@ async def _rcp(data: bytes) -> int:
 
 async def _osc52(tmux: bool, data: bytes) -> int:
     def cont() -> None:
+        # TMUX wrap start
         if tmux:
             stderr.buffer.write(b"\x1BPtmux;")
 
+        # TMUX escape `ESC`
         if tmux:
             stderr.buffer.write(b"\x1B")
 
+        # OSC52 start
         stderr.buffer.write(b"\x1B]52;c;")
+
+        # OSC52 body
         stderr.buffer.write(b64encode(data))
 
+        # TMUX escape `ESC`
         if tmux:
             stderr.buffer.write(b"\x1B\\")
 
+        # OSC52 end
         stderr.buffer.write(b"\x1B\x9c")
 
+        # TMUX wrap end
         if tmux:
             stderr.buffer.write(b"\x1B\\")
 
