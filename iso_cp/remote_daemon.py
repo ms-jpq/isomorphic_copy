@@ -3,7 +3,7 @@ from asyncio import StreamReader, StreamWriter, start_unix_server
 from os.path import normcase
 from sys import stdout
 
-from .consts import NUL, SOCKET_PATH
+from .consts import LIMIT, NUL, SOCKET_PATH
 from .shared import run_in_executor
 
 
@@ -17,7 +17,7 @@ async def r_daemon() -> int:
 
         await run_in_executor(cont)
 
-    server = await start_unix_server(handler, normcase(SOCKET_PATH), limit=2**32)
+    server = await start_unix_server(handler, normcase(SOCKET_PATH), limit=LIMIT)
 
     if sys.version_info > (3, 7):
         async with server:

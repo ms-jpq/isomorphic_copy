@@ -1,6 +1,7 @@
 from pathlib import Path
 
 NUL = b"\0"
+LIMIT = 2**32
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
 _TOP_LV = Path(__file__).resolve().parent.parent

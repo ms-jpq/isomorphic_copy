@@ -9,7 +9,7 @@ from sys import stderr
 from textwrap import dedent
 from typing import Sequence
 
-from .consts import BIN, NUL, TIME_FMT
+from .consts import BIN, LIMIT, NUL, TIME_FMT
 from .copy import copy
 from .logging import log
 from .shared import join, kill_children
@@ -39,7 +39,7 @@ def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
 async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     cmds = _tunnel_cmd(name, args=args)
     proc = await create_subprocess_exec(
-        *cmds, start_new_session=True, stdin=DEVNULL, stdout=PIPE
+        *cmds, start_new_session=True, stdin=DEVNULL, stdout=PIPE, limit=LIMIT
     )
     p_done = ensure_future(proc.wait())
     time = datetime.now().strftime(TIME_FMT)
