@@ -1,8 +1,10 @@
 import sys
 from asyncio import gather, open_unix_connection
+from base64 import b64encode
 from os import environ, sep
 from pathlib import Path
 from shutil import which
+from sys import stdout
 from typing import Awaitable, Iterator, Sequence
 
 from .consts import NUL, SOCKET_PATH, WRITE_PATH
@@ -34,6 +36,17 @@ async def _rcp(data: bytes) -> int:
     return 0
 
 
+async def _osc52(data: bytes) -> int:
+    def cont() -> None:
+        stdout.buffer.write(b"\033]52;c;")
+        stdout.buffer.write(b64encode(data))
+        stdout.buffer.write(b"\a")
+        stdout.buffer.flush()
+
+    await run_in_executor(cont)
+    return 0
+
+
 async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
     def c1() -> Iterator[Awaitable[int]]:
         if _is_remote():
@@ -41,6 +54,9 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
 
         if which("tmux") and "TMUX" in environ:
             yield call("tmux", "load-buffer", "-", stdin=data)
+
+        # if "SSH_TTY" in environ:
+        #     yield _osc52(data)
 
         if which("pbcopy"):
             yield call("pbcopy", stdin=data)
