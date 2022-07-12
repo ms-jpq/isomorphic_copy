@@ -38,7 +38,7 @@ async def _rcp(data: bytes) -> int:
 
 async def _osc52(data: bytes) -> int:
     def cont() -> None:
-        stdout.buffer.write(b"\033]52;c;")
+        stdout.buffer.write(b"\x1B]52;c;")
         stdout.buffer.write(b64encode(data))
         stdout.buffer.write(b"\a")
         stdout.buffer.flush()
@@ -55,8 +55,8 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
         if which("tmux") and "TMUX" in environ:
             yield call("tmux", "load-buffer", "-", stdin=data)
 
-        # if "SSH_TTY" in environ:
-        #     yield _osc52(data)
+        if stdout.isatty() and "SSH_TTY" in environ and "TMUX" not in environ:
+            yield _osc52(data)
 
         if which("pbcopy"):
             yield call("pbcopy", stdin=data)
