@@ -36,11 +36,15 @@ async def _rcp(data: bytes) -> int:
     return 0
 
 
-async def _osc52(data: bytes) -> int:
+async def _osc52(tmux: bool, data: bytes) -> int:
     def cont() -> None:
+        if tmux:
+            stdout.buffer.write(b"\x1BPtmux;\x1B")
         stdout.buffer.write(b"\x1B]52;c;")
         stdout.buffer.write(b64encode(data))
         stdout.buffer.write(b"\a")
+        if tmux:
+            stdout.buffer.write(b"\x1B\\")
         stdout.buffer.flush()
 
     await run_in_executor(cont)
@@ -49,14 +53,16 @@ async def _osc52(data: bytes) -> int:
 
 async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
     def c1() -> Iterator[Awaitable[int]]:
+        tmux = bool(which("tmux") and "TMUX" in environ)
+
         if _is_remote():
             yield _rcp(data)
 
-        if which("tmux") and "TMUX" in environ:
+        if tmux:
             yield call("tmux", "load-buffer", "-", stdin=data)
 
-        if stdout.isatty() and "SSH_TTY" in environ and "TMUX" not in environ:
-            yield _osc52(data)
+        if stdout.isatty() and "SSH_TTY" in environ:
+            yield _osc52(tmux, data=data)
 
         if which("pbcopy"):
             yield call("pbcopy", stdin=data)
