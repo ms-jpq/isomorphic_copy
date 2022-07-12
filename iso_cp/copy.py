@@ -26,12 +26,14 @@ async def _rcp(data: bytes) -> int:
     except (FileNotFoundError, ConnectionRefusedError):
         pass
     else:
-        writer.write(data)
-        writer.write(NUL)
-        await writer.drain()
-        writer.close()
-        if sys.version_info > (3, 7):
-            await writer.wait_closed()
+        try:
+            writer.write(data)
+            writer.write(NUL)
+            await writer.drain()
+        finally:
+            writer.close()
+            if sys.version_info > (3, 7):
+                await writer.wait_closed()
 
     return 0
 
