@@ -17,7 +17,7 @@ async def r_daemon() -> int:
 
         await run_in_executor(cont)
 
-    server = await start_unix_server(handler, normcase(SOCKET_PATH))
+    server = await start_unix_server(handler, normcase(SOCKET_PATH), limit=2**32)
 
     if sys.version_info > (3, 7):
         async with server:
