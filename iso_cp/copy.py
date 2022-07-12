@@ -4,7 +4,7 @@ from base64 import b64encode
 from os import environ, sep
 from pathlib import Path
 from shutil import which
-from sys import stdout
+from sys import stderr
 from typing import Awaitable, Iterator, Sequence
 
 from .consts import NUL, SOCKET_PATH, WRITE_PATH
@@ -39,15 +39,15 @@ async def _rcp(data: bytes) -> int:
 async def _osc52(tmux: bool, data: bytes) -> int:
     def cont() -> None:
         if tmux:
-            stdout.buffer.write(b"\x1BPtmux;\x1B")
+            stderr.buffer.write(b"\x1BPtmux;\x1B")
 
-        stdout.buffer.write(b"\x1B]52;c;")
-        stdout.buffer.write(b64encode(data))
-        stdout.buffer.write(b"\a")
+        stderr.buffer.write(b"\x1B]52;c;")
+        stderr.buffer.write(b64encode(data))
+        stderr.buffer.write(b"\a")
 
         if tmux:
-            stdout.buffer.write(b"\x1B\\")
-        stdout.buffer.flush()
+            stderr.buffer.write(b"\x1B\\")
+        stderr.buffer.flush()
 
     await run_in_executor(cont)
     return 0
@@ -63,7 +63,7 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
         if tmux:
             yield call("tmux", "load-buffer", "-", stdin=data)
 
-        if stdout.isatty() and "SSH_TTY" in environ:
+        if stderr.isatty() and "SSH_TTY" in environ:
             yield _osc52(tmux, data=data)
 
         if which("pbcopy"):
