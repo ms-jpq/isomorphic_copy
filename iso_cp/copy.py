@@ -101,5 +101,5 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
 
             yield run_in_executor(c2)
 
-    cum = sum(await gather(*c1()))
+    cum: int = sum(await gather(*c1()))
     return cum
