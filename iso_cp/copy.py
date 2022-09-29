@@ -56,10 +56,10 @@ async def _osc52(tmux: bool, data: bytes) -> int:
 
         # TMUX escape `ESC`
         if tmux:
-            stderr.buffer.write(b"\x1B\\")
+            stderr.buffer.write(b"\x1B")
 
         # OSC52 end
-        stderr.buffer.write(b"\x1B\x9c")
+        stderr.buffer.write(b"\x1B\\")
 
         # TMUX wrap end
         if tmux:
@@ -92,6 +92,9 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
         elif which("xclip") and "DISPLAY" in environ:
             yield call("xclip", *args, "-selection", "clipboard", stdin=data)
             yield call("xclip", *args, "-selection", "primary", stdin=data)
+
+        elif which("clip.exe"):
+            yield call("clip.exe", stdin=data)
 
         elif local:
 

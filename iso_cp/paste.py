@@ -23,6 +23,9 @@ async def paste(local: bool, args: Sequence[str]) -> int:
         # TODO -- primary clipboard ???
         return await call("xclip", *xargs, "-selection", "clipboard")
 
+    elif which("powershell.exe"):
+        return await call("powershell.exe", "-command", "Get-Clipboard -Raw")
+
     elif which("tmux") and "TMUX" in environ:
         return await call("tmux", "save-buffer", "-")
 
