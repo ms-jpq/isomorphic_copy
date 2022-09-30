@@ -1,13 +1,13 @@
 from asyncio import FIRST_COMPLETED, IncompleteReadError, ensure_future, sleep, wait
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from datetime import datetime
 from os import environ, sep
 from pathlib import Path
 from shlex import quote
 from sys import stdout
 from textwrap import dedent
-from typing import Sequence
+from typing import Iterator, Sequence
 
 from .consts import BIN, LIMIT, NUL, TIME_FMT, TITLE
 from .copy import copy
@@ -77,17 +77,28 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
         await proc.wait()
 
 
-async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
-    if "TMUX" in environ:
-        stdout.write(f"\x1Bk{TITLE}\x1B\\")
-    else:
-        stdout.write(f"\x1B]0;{TITLE}\x1B\\")
+@contextmanager
+def _title() -> Iterator[None]:
+    def cont(title: str):
+        if "TMUX" in environ:
+            stdout.write(f"\x1Bk{title}\x1B\\")
+        else:
+            stdout.write(f"\x1B]0;{title}\x1B\\")
 
-    stdout.flush()
-
-    while True:
-        code = await _daemon(local, name=name, args=args)
-        log.warn("%s", f"Exited - $? {code}")
-        stdout.write("\a")
         stdout.flush()
-        await sleep(1)
+
+    cont(TITLE)
+    try:
+        yield None
+    finally:
+        cont("")
+
+
+async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
+    with _title():
+        while True:
+            code = await _daemon(local, name=name, args=args)
+            log.warn("%s", f"Exited - $? {code}")
+            stdout.write("\a")
+            stdout.flush()
+            await sleep(1)
