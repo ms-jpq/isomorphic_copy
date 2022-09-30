@@ -4,6 +4,7 @@ NUL = b"\0"
 LIMIT = 2**32
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
+TITLE = "ISO-CP"
 _TOP_LV = Path(__file__).resolve().parent.parent
 TMP = _TOP_LV / "tmp"
 

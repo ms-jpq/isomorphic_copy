@@ -2,14 +2,14 @@ from asyncio import FIRST_COMPLETED, IncompleteReadError, ensure_future, sleep, 
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import suppress
 from datetime import datetime
-from os import sep
+from os import environ, sep
 from pathlib import Path
 from shlex import quote
-from sys import stderr
+from sys import stdout
 from textwrap import dedent
 from typing import Sequence
 
-from .consts import BIN, LIMIT, NUL, TIME_FMT
+from .consts import BIN, LIMIT, NUL, TIME_FMT, TITLE
 from .copy import copy
 from .logging import log
 from .shared import join, kill_children
@@ -78,8 +78,16 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
 
 
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
+    if "TMUX" in environ:
+        stdout.write(f"\x1Bk{TITLE}\x1B\\")
+    else:
+        stdout.write(f"\x1B]0;{TITLE}\x1B\\")
+
+    stdout.flush()
+
     while True:
         code = await _daemon(local, name=name, args=args)
         log.warn("%s", f"Exited - $? {code}")
-        print("\a", end="", file=stderr, flush=True)
+        stdout.write("\a")
+        stdout.flush()
         await sleep(1)
