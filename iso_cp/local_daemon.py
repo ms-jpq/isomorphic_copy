@@ -79,7 +79,7 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
 
 @contextmanager
 def _title() -> Iterator[None]:
-    def cont(title: str):
+    def cont(title: str) -> None:
         if "TMUX" in environ:
             stdout.write(f"\x1Bk{title}\x1B\\")
         else:
