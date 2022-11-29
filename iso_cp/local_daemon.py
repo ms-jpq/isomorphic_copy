@@ -3,6 +3,7 @@ from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import contextmanager, suppress
 from datetime import datetime
 from os import environ, sep
+from os.path import normpath
 from pathlib import Path
 from shlex import quote
 from sys import stdout
@@ -12,7 +13,7 @@ from typing import Iterator, Sequence
 from .consts import BIN, LIMIT, NUL, TIME_FMT, TITLE
 from .copy import copy
 from .logging import log
-from .shared import join, kill_children
+from .shared import join, kill_children, run_in_executor
 
 
 def _tunneling_prog() -> str:
@@ -21,9 +22,9 @@ def _tunneling_prog() -> str:
     try:
         rel_path = canonical.relative_to(Path.home())
     except ValueError:
-        return quote(str(canonical))
+        return quote(normpath(canonical))
     else:
-        return 'exec "$HOME"' + quote(str(Path(sep) / rel_path))
+        return 'exec "$HOME"' + quote(normpath(Path(sep) / rel_path))
 
 
 def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
@@ -94,11 +95,15 @@ def _title() -> Iterator[None]:
         cont("")
 
 
+def _bell() -> None:
+    stdout.write("\a")
+    stdout.flush()
+
+
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
     with _title():
         while True:
             code = await _daemon(local, name=name, args=args)
             log.warn("%s", f"Exited - $? {code}")
-            stdout.write("\a")
-            stdout.flush()
+            await run_in_executor(_bell)
             await sleep(1)

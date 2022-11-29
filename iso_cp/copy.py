@@ -2,6 +2,7 @@ import sys
 from asyncio import gather, open_unix_connection
 from base64 import b64encode
 from os import environ, sep
+from os.path import normpath
 from pathlib import Path
 from shutil import which
 from sys import stderr
@@ -22,7 +23,7 @@ def _is_remote() -> bool:
 
 async def _rcp(data: bytes) -> int:
     try:
-        _, writer = await open_unix_connection(str(SOCKET_PATH))
+        _, writer = await open_unix_connection(normpath(SOCKET_PATH))
     except (FileNotFoundError, ConnectionRefusedError):
         pass
     else:
@@ -74,14 +75,14 @@ async def _osc52(tmux: bool, data: bytes) -> int:
 
 async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
     def c1() -> Iterator[Awaitable[int]]:
-        tmux = bool(which("tmux") and "TMUX" in environ)
+        tmux = "TMUX" in environ and which("tmux")
 
         if _is_remote():
             yield _rcp(data)
-            yield _osc52(tmux, data=data)
+            yield _osc52(bool(tmux), data=data)
 
         if tmux:
-            yield call("tmux", "load-buffer", "-", stdin=data)
+            yield call(tmux, "load-buffer", "-", stdin=data)
 
         if which("pbcopy"):
             yield call("pbcopy", stdin=data)
