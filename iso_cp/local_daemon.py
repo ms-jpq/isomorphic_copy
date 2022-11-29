@@ -1,4 +1,5 @@
-from asyncio import FIRST_COMPLETED, IncompleteReadError, ensure_future, sleep, wait
+from asyncio import FIRST_COMPLETED, LimitOverrunError, ensure_future, sleep, wait
+from asyncio.streams import StreamReader
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import contextmanager, suppress
 from datetime import datetime
@@ -37,6 +38,21 @@ def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
         assert False
 
 
+async def _p_data(stdout: StreamReader) -> bytes:
+    acc = bytearray()
+    while True:
+        try:
+            b = await stdout.readuntil(NUL)
+        except LimitOverrunError as e:
+            c = await stdout.readexactly(e.consumed)
+            acc.extend(c)
+        else:
+            acc.extend(b)
+            break
+
+    return acc
+
+
 async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     cmds = _tunnel_cmd(name, args=args)
     proc = await create_subprocess_exec(
@@ -51,23 +67,22 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     """
     log.info("%s", dedent(msg))
 
+    assert proc.stdout
     try:
-        assert proc.stdout
         while True:
-            p_data = ensure_future(proc.stdout.readuntil(NUL))
+            p_data = ensure_future(_p_data(proc.stdout))
             await wait((p_done, p_data), return_when=FIRST_COMPLETED)
 
             if p_data.done():
-                with suppress(IncompleteReadError):
-                    data = await p_data
-                    await copy(local, args=args, data=data[:-1])
+                data = await p_data
+                await copy(local, args=args, data=data[:-1])
 
-                    time = datetime.now().strftime(TIME_FMT)
-                    msg = f"""
+                time = datetime.now().strftime(TIME_FMT)
+                msg = f"""
                     -- RECV --
                     {time}
                     """
-                    log.info("%s", dedent(msg))
+                log.info("%s", dedent(msg))
 
             if p_done.done():
                 return await proc.wait()
