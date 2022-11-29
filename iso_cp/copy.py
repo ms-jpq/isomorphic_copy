@@ -82,7 +82,7 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
             yield _osc52(bool(tmux), data=data)
 
         if tmux:
-            yield call(tmux, "load-buffer", "-", stdin=data)
+            yield call(tmux, "load-buffer", "--", "-", stdin=data)
 
         if which("pbcopy"):
             yield call("pbcopy", stdin=data)
