@@ -77,7 +77,9 @@ class _Suicide:
 
 
 def _path_mask() -> None:
-    paths = (path for path in environ["PATH"].split(pathsep) if path != str(BIN))
+    paths = (
+        path for path in environ.get("PATH", "").split(pathsep) if path != str(BIN)
+    )
     environ["PATH"] = pathsep.join(paths)
 
 
