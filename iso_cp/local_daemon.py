@@ -1,4 +1,11 @@
-from asyncio import FIRST_COMPLETED, LimitOverrunError, ensure_future, sleep, wait
+from asyncio import (
+    FIRST_COMPLETED,
+    IncompleteReadError,
+    LimitOverrunError,
+    ensure_future,
+    sleep,
+    wait,
+)
 from asyncio.streams import StreamReader
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import contextmanager, suppress
@@ -43,6 +50,8 @@ async def _p_data(stdout: StreamReader) -> bytes:
     while True:
         try:
             b = await stdout.readuntil(NUL)
+        except IncompleteReadError:
+            break
         except LimitOverrunError as e:
             c = await stdout.readexactly(e.consumed)
             acc.extend(c)
