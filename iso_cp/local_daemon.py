@@ -84,14 +84,15 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
 
             if p_data.done():
                 data = await p_data
-                await copy(local, args=args, data=data[:-1])
+                if data:
+                    await copy(local, args=args, data=data[:-1])
 
-                time = datetime.now().strftime(TIME_FMT)
-                msg = f"""
-                    -- RECV --
-                    {time}
-                    """
-                log.info("%s", dedent(msg))
+                    time = datetime.now().strftime(TIME_FMT)
+                    msg = f"""
+                        -- RECV --
+                        {time}
+                        """
+                    log.info("%s", dedent(msg))
 
             if p_done.done():
                 return await proc.wait()
