@@ -94,6 +94,10 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
             yield call("xclip", *args, "-selection", "clipboard", stdin=data)
             yield call("xclip", *args, "-selection", "primary", stdin=data)
 
+        elif which("xsel") and "DISPLAY" in environ:
+            yield call("xsel", *args, "--input", "--primary", stdin=data)
+            yield call("xsel", *args, "--input", "--clipboard", stdin=data)
+
         elif which("clip.exe"):
             yield call("clip.exe", stdin=data)
 

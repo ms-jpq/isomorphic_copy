@@ -98,6 +98,8 @@ def _is_copy(name: str, args: Sequence[str]) -> bool:
         return True
     elif name == "xclip" and {*args}.isdisjoint({"-o", "-out"}):
         return True
+    elif name == "xsel" and {*args}.isdisjoint({"-i", "--input"}):
+        return True
     else:
         return False
 
@@ -106,6 +108,8 @@ def _is_paste(name: str, args: Sequence[str]) -> bool:
     if name in {"p", "pbpaste", "wl-paste"}:
         return True
     elif name == "xclip" and not {*args}.isdisjoint({"-o", "-out"}):
+        return True
+    elif name == "xsel" and not {*args}.isdisjoint({"-o", "--output"}):
         return True
     else:
         return False
