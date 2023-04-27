@@ -98,7 +98,7 @@ def _is_copy(name: str, args: Sequence[str]) -> bool:
         return True
     elif name == "xclip" and {*args}.isdisjoint({"-o", "-out"}):
         return True
-    elif name == "xsel" and {*args}.isdisjoint({"-i", "--input"}):
+    elif name == "xsel" and {*args}.isdisjoint({"-o", "--output"}):
         return True
     else:
         return False
