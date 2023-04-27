@@ -19,9 +19,12 @@ async def paste(local: bool, args: Sequence[str]) -> int:
         return await call("wl-paste")
 
     elif which("xclip") and "DISPLAY" in environ:
-        xargs = chain(args, ("-out",)) if {*args}.isdisjoint({"-o", "-out"}) else args
-        # TODO -- primary clipboard ???
-        return await call("xclip", *xargs, "-selection", "clipboard")
+        xargs = (
+            chain(args, ("-out",), (() if args else ("-selection", "clipboard")))
+            if {*args}.isdisjoint({"-o", "-out"})
+            else args
+        )
+        return await call("xclip", *xargs)
 
     elif which("xsel") and "DISPLAY" in environ:
         xargs = (
@@ -29,7 +32,7 @@ async def paste(local: bool, args: Sequence[str]) -> int:
             if {*args}.isdisjoint({"-o", "--output"})
             else args
         )
-        return await call("xsel", *xargs, "--clipboard")
+        return await call("xsel", *xargs)
 
     elif which("powershell.exe"):
         return await call("powershell.exe", "-command", "Get-Clipboard -Raw")
