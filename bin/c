@@ -7,14 +7,11 @@ set -eu
 ###################
 
 prog="$0"
-cd "$(dirname "$(dirname "$prog")")" || exit 1
-
+cd "$(dirname -- "$(dirname -- "$prog")")" || exit 1
 
 EXEC="$PWD/tmp/python"
-if [ -x "$EXEC" ]
-then
+if [ -x "$EXEC" ]; then
   exec "$EXEC" -m iso_cp -- "$prog" "$@"
 else
   exec python3 -m iso_cp -- "$prog" "$@"
 fi
-

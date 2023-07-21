@@ -3,7 +3,8 @@ from asyncio import Future, ensure_future, sleep
 from itertools import chain
 from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
-from pathlib import Path
+from os.path import normpath
+from pathlib import Path, PurePath
 from signal import SIGTERM
 from sys import executable, stdin
 from typing import Any, Awaitable, Optional, Sequence, Tuple
@@ -78,7 +79,7 @@ class _Suicide:
 
 def _path_mask() -> None:
     paths = (
-        path for path in environ.get("PATH", "").split(pathsep) if path != str(BIN)
+        path for path in environ.get("PATH", "").split(pathsep) if path != normpath(BIN)
     )
     environ["PATH"] = pathsep.join(paths)
 
@@ -121,9 +122,13 @@ def _legal_names() -> Sequence[str]:
     return names
 
 
+def _parse(name: str) -> str:
+    return PurePath(name).name
+
+
 def _parse_args() -> Tuple[Namespace, Sequence[str]]:
     parser = ArgumentParser()
-    parser.add_argument("name", choices=_legal_names())
+    parser.add_argument("name", type=_parse, choices=_legal_names())
     return parser.parse_known_args()
 
 
@@ -132,7 +137,7 @@ async def main() -> int:
     _link()
 
     ns, args = _parse_args()
-    name = Path(ns.name).name
+    name: str = ns.name
     local = "ISOCP_USE_FILE" in environ
 
     async with _Suicide(_s1()):
