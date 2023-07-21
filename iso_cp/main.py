@@ -77,10 +77,9 @@ class _Suicide:
                     await sleep(0)
 
 
-def _path_mask() -> None:
-    paths = (
-        path for path in environ.get("PATH", "").split(pathsep) if path != normpath(BIN)
-    )
+def _path_mask(parent: PurePath) -> None:
+    ps = {normpath(BIN), normpath(parent)}
+    paths = (path for path in environ.get("PATH", "").split(pathsep) if path not in ps)
     environ["PATH"] = pathsep.join(paths)
 
 
@@ -117,27 +116,27 @@ def _is_paste(name: str, args: Sequence[str]) -> bool:
 
 
 def _legal_names() -> Sequence[str]:
-    paths = sorted(BIN.iterdir(), key=lambda p: tuple(map(strxfrm, p.parts)))
-    names = tuple(chain((p.name for p in paths), map(str, paths)))
+    names = sorted((p.name for p in BIN.iterdir()), key=strxfrm)
     return names
 
 
-def _parse(name: str) -> str:
-    return PurePath(name).name
-
-
-def _parse_args() -> Tuple[Namespace, Sequence[str]]:
+def _parse_args(choices: Optional[Sequence[str]]) -> Tuple[Namespace, Sequence[str]]:
     parser = ArgumentParser()
-    parser.add_argument("name", type=_parse, choices=_legal_names())
+    parser.add_argument("name", choices=choices)
     return parser.parse_known_args()
 
 
 async def main() -> int:
-    _path_mask()
+    ns, args = _parse_args(None)
+    path = PurePath(ns.name)
+    _path_mask(path.parent)
     _link()
 
-    ns, args = _parse_args()
-    name: str = ns.name
+    legal_names = _legal_names()
+    name = path.name
+    if name not in legal_names:
+        _parse_args(legal_names)
+
     local = "ISOCP_USE_FILE" in environ
 
     async with _Suicide(_s1()):

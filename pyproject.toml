@@ -1,0 +1,7 @@
+[project]
+name            = "isomorphic-copy"
+requires-python = ">=3.7.0"
+version         = "0"
+
+[project.optional-dependencies]
+dev = ["mypy", "isort", "black"]
