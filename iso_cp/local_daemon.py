@@ -30,18 +30,16 @@ def _tunneling_prog() -> str:
     rel = canonical.relative_to(TOP_LV.parent)
     eh = f'exec "$HOME"{sep}'
 
-    opt = home / ".local" / "opt"
-    rl = opt / rel
+    opt = home / ".local" / "opt" / rel
     with suppress(FileNotFoundError, ValueError):
-        if rl.samefile(canonical):
-            rel_path = rl.relative_to(home)
+        if opt.samefile(canonical):
+            rel_path = opt.relative_to(home)
             return eh + quote(normpath(rel_path))
 
-    xdg = environ.get("XDG_CONFIG_HOME", home / ".config")
-    rl = xdg / rel
+    xdg = environ.get("XDG_CONFIG_HOME", home / ".config") / rel
     with suppress(FileNotFoundError, ValueError):
-        if rl.samefile(canonical):
-            rel_path = rl.relative_to(home)
+        if xdg.samefile(canonical):
+            rel_path = xdg.relative_to(home)
             return eh + quote(normpath(rel_path))
 
     with suppress(ValueError):
