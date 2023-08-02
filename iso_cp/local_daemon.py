@@ -18,21 +18,30 @@ from sys import stdout
 from textwrap import dedent
 from typing import Iterator, Sequence
 
-from .consts import BIN, LIMIT, NUL, TIME_FMT, TITLE
+from .consts import BIN, LIMIT, NUL, TIME_FMT, TITLE, TOP_LV
 from .copy import copy
 from .logging import log
 from .shared import join, kill_children, run_in_executor
 
 
 def _tunneling_prog() -> str:
+    home = Path.home()
     canonical = BIN / "csshd"
+    rel = canonical.relative_to(TOP_LV.parent)
+    eh = f'exec "$HOME"{sep}'
 
-    try:
-        rel_path = canonical.relative_to(Path.home())
-    except ValueError:
-        return quote(normpath(canonical))
-    else:
-        return 'exec "$HOME"' + quote(normpath(Path(sep) / rel_path))
+    opt = home / ".local" / "opt"
+    rl = opt / rel
+    with suppress(FileNotFoundError, ValueError):
+        if rl.samefile(canonical):
+            rel_path = rl.relative_to(home)
+            return eh + quote(normpath(rel_path))
+
+    with suppress(ValueError):
+        rel_path = canonical.relative_to(home)
+        return eh + quote(normpath(rel_path))
+
+    return quote(normpath(canonical))
 
 
 def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:

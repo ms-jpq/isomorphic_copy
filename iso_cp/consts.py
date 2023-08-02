@@ -5,11 +5,11 @@ LIMIT = 2**32
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
 TITLE = "ISO-CP"
-_TOP_LV = Path(__file__).resolve().parent.parent
-TMP = _TOP_LV / "tmp"
+TOP_LV = Path(__file__).resolve().parent.parent
+TMP = TOP_LV / "tmp"
 
 
-BIN = _TOP_LV / "bin"
+BIN = TOP_LV / "bin"
 EXEC = TMP / "python"
 
 SOCKET_PATH = TMP / "cp.socket"
