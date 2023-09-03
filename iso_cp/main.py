@@ -1,6 +1,5 @@
 from argparse import ArgumentParser, Namespace
 from asyncio import Future, ensure_future, sleep
-from itertools import chain
 from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
 from os.path import normpath
