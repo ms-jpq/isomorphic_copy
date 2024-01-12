@@ -134,15 +134,10 @@ def _title() -> Iterator[None]:
         cont("")
 
 
-def _bell() -> None:
-    stdout.write("\a")
-    stdout.flush()
-
-
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
     with _title():
         while True:
             code = await _daemon(local, name=name, args=args)
             log.warn("%s", f"Exited - $? {code}")
-            await run_in_executor(_bell)
+            # await run_in_executor(_bell)
             await sleep(1)
