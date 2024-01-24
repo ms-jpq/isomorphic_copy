@@ -4,6 +4,7 @@ from locale import strxfrm
 from os import environ, getpid, getppid, kill, pathsep, readlink
 from os.path import normpath
 from pathlib import Path, PurePath
+from platform import system
 from signal import SIGTERM
 from sys import executable, stdin
 from typing import Any, Awaitable, Optional, Sequence, Tuple
@@ -83,7 +84,11 @@ def _path_mask(parent: PurePath) -> None:
 
 
 def _link() -> None:
-    python = Path(executable).resolve()
+    sys = system().casefold()
+    if sys == "darwin":
+        python = Path("/usr/bin/python3")
+    else:
+        python = Path(executable).resolve()
     try:
         if Path(readlink(EXEC)) != python:
             EXEC.unlink()
