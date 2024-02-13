@@ -14,7 +14,7 @@ from os import environ, sep
 from os.path import normpath
 from pathlib import Path
 from shlex import quote
-from sys import stdout
+from sys import stderr, stdout
 from textwrap import dedent
 from typing import Iterator, Sequence
 
@@ -130,11 +130,11 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
 def _title() -> Iterator[None]:
     def cont(title: str) -> None:
         if "TMUX" in environ:
-            stdout.write(f"\x1Bk{title}\x1B\\")
+            stderr.write(f"\x1Bk{title}\x1B\\")
         else:
-            stdout.write(f"\x1B]0;{title}\x1B\\")
+            stderr.write(f"\x1B]0;{title}\x1B\\")
 
-        stdout.flush()
+        stderr.flush()
 
     cont(TITLE)
     try:
