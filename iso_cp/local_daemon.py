@@ -21,7 +21,7 @@ from typing import Iterator, Sequence
 from .consts import BIN, LIMIT, NUL, TIME_FMT, TITLE, TOP_LV
 from .copy import copy
 from .logging import log
-from .shared import join, kill_children, run_in_executor
+from .shared import join, kill_children
 
 
 def _tunneling_prog() -> str:
@@ -52,7 +52,7 @@ def _tunneling_prog() -> str:
 def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
     sh = _tunneling_prog()
     if name == "cssh":
-        return ("ssh", "-T", *args, sh)
+        return ("ssh", "-T", "-o", "ClearAllForwardings=yes", *args, sh)
     elif name == "cdocker":
         return ("docker", "exec", *args, "sh", "-c", sh)
     else:
