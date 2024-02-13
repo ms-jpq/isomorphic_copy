@@ -58,6 +58,8 @@ def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
             "-o",
             "ControlPath=none",
             "-o",
+            "ForwardAgent=no",
+            "-o",
             "ClearAllForwardings=yes",
             *args,
             sh,
