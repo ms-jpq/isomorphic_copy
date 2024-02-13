@@ -128,27 +128,9 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
         await proc.wait()
 
 
-@contextmanager
-def _title() -> Iterator[None]:
-    def cont(title: str) -> None:
-        if "TMUX" in environ:
-            stderr.write(f"\x1Bk{title}\x1B\\")
-        else:
-            stderr.write(f"\x1B]0;{title}\x1B\\")
-
-        stderr.flush()
-
-    cont(TITLE)
-    try:
-        yield None
-    finally:
-        cont("")
-
-
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
-    with _title():
-        while True:
-            code = await _daemon(local, name=name, args=args)
-            log.warn("%s", f"Exited - $? {code}")
-            # await run_in_executor(_bell)
-            await sleep(1)
+    while True:
+        code = await _daemon(local, name=name, args=args)
+        log.warn("%s", f"Exited - $? {code}")
+        # await run_in_executor(_bell)
+        await sleep(1)
