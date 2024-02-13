@@ -52,7 +52,16 @@ def _tunneling_prog() -> str:
 def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
     sh = _tunneling_prog()
     if name == "cssh":
-        return ("ssh", "-T", "-o", "ClearAllForwardings=yes", *args, sh)
+        return (
+            "ssh",
+            "-T",
+            "-o",
+            "ControlPath=none",
+            "-o",
+            "ClearAllForwardings=yes",
+            *args,
+            sh,
+        )
     elif name == "cdocker":
         return ("docker", "exec", *args, "sh", "-c", sh)
     else:
