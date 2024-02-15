@@ -14,7 +14,7 @@ from os import environ, sep
 from os.path import normpath
 from pathlib import Path
 from shlex import quote
-from sys import stderr, stdout
+from sys import stderr
 from textwrap import dedent
 from typing import Iterator, Sequence
 
@@ -128,9 +128,27 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
         await proc.wait()
 
 
+@contextmanager
+def _title() -> Iterator[None]:
+    def cont(title: str) -> None:
+        if "TMUX" in environ:
+            stderr.write(f"\x1B]2;{title}\x1B\\")
+        else:
+            stderr.write(f"\x1B]0;{title}\x1B\\")
+
+        stderr.flush()
+
+    cont(TITLE)
+    try:
+        yield None
+    finally:
+        cont("")
+
+
 async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
-    while True:
-        code = await _daemon(local, name=name, args=args)
-        log.warn("%s", f"Exited - $? {code}")
-        # await run_in_executor(_bell)
-        await sleep(1)
+    with _title():
+        while True:
+            code = await _daemon(local, name=name, args=args)
+            log.warn("%s", f"Exited - $? {code}")
+            # await run_in_executor(_bell)
+            await sleep(1)
