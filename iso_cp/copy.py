@@ -8,8 +8,8 @@ from shutil import which
 from sys import stderr
 from typing import Awaitable, Iterator, Sequence
 
-from .consts import NUL, SOCKET_PATH, WRITE_PATH
-from .shared import call, run_in_executor, safe_write
+from iso_cp.consts import NUL, SOCKET_PATH, WRITE_PATH
+from iso_cp.shared import call, run_in_executor, safe_write
 
 
 def _is_remote() -> bool:

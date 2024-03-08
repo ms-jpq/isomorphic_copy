@@ -18,10 +18,10 @@ from sys import stderr
 from textwrap import dedent
 from typing import Iterator, Sequence
 
-from .consts import BIN, LIMIT, NUL, TIME_FMT, TITLE, TOP_LV
-from .copy import copy
-from .logging import log
-from .shared import join, kill_children
+from iso_cp.consts import BIN, LIMIT, NUL, TIME_FMT, TITLE, TOP_LV
+from iso_cp.copy import copy
+from iso_cp.logging import log
+from iso_cp.shared import join, kill_children
 
 
 def _tunneling_prog() -> str:

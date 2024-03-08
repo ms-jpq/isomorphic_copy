@@ -6,12 +6,10 @@ set -eu
 # Skip Slow Shims #
 ###################
 
-prog="$0"
-cd "$(dirname -- "$(dirname -- "$prog")")" || exit 1
-
 EXEC="$PWD/tmp/python"
+MAIN="${0%/*}/../main.py"
 if [ -x "$EXEC" ]; then
-  exec "$EXEC" -m iso_cp -- "$prog" "$@"
+  exec "$EXEC" "$MAIN" -- "$0" "$@"
 else
-  exec python3 -m iso_cp -- "$prog" "$@"
+  exec python3 "$MAIN" -- "$0" "$@"
 fi

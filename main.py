@@ -3,9 +3,9 @@ from asyncio import get_event_loop
 from sys import exit
 from typing import Awaitable, TypeVar
 
-T = TypeVar("T")
+from iso_cp.main import main
 
-from .main import main
+T = TypeVar("T")
 
 if sys.version_info > (3, 7):
     from asyncio import run

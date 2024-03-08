@@ -10,13 +10,13 @@ from sys import executable, stdin
 from typing import Any, Awaitable, Optional, Sequence, Tuple
 from uuid import uuid4
 
-from .consts import BIN, EXEC, L_UID_PATH, R_UID_PATH
-from .copy import copy
-from .local_daemon import l_daemon
-from .logging import log_exc
-from .paste import paste
-from .remote_daemon import r_daemon
-from .shared import run_in_executor, safe_write
+from iso_cp.consts import BIN, EXEC, L_UID_PATH, R_UID_PATH
+from iso_cp.copy import copy
+from iso_cp.local_daemon import l_daemon
+from iso_cp.logging import log_exc
+from iso_cp.paste import paste
+from iso_cp.remote_daemon import r_daemon
+from iso_cp.shared import run_in_executor, safe_write
 
 
 def _suicide() -> None:

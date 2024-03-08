@@ -6,9 +6,9 @@ from sys import stdout
 from textwrap import dedent
 from typing import Sequence
 
-from .consts import WRITE_PATH
-from .logging import log
-from .shared import call, run_in_executor
+from iso_cp.consts import WRITE_PATH
+from iso_cp.logging import log
+from iso_cp.shared import call, run_in_executor
 
 
 async def paste(local: bool, args: Sequence[str]) -> int:

@@ -9,7 +9,7 @@ from signal import SIGKILL
 from tempfile import NamedTemporaryFile
 from typing import Any, Callable, Iterable, Optional, TypeVar
 
-from .consts import TMP
+from iso_cp.consts import TMP
 
 _T = TypeVar("_T")
 

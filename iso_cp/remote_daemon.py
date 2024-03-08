@@ -3,8 +3,8 @@ from asyncio import StreamReader, StreamWriter, start_unix_server
 from os.path import normcase
 from sys import stdout
 
-from .consts import LIMIT, NUL, SOCKET_PATH
-from .shared import run_in_executor
+from iso_cp.consts import LIMIT, NUL, SOCKET_PATH
+from iso_cp.shared import run_in_executor
 
 
 async def r_daemon() -> int:
