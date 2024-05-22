@@ -34,6 +34,9 @@ async def paste(local: bool, args: Sequence[str]) -> int:
         )
         return await call("xsel", *xargs)
 
+    elif which("kitten"):
+        return await call("kitten", "clipboard", "--get-clipboard")
+
     elif which("powershell.exe"):
         return await call("powershell.exe", "-command", "Get-Clipboard -Raw")
 

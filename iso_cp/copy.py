@@ -101,6 +101,9 @@ async def copy(local: bool, args: Sequence[str], data: bytes) -> int:
         elif which("clip.exe"):
             yield call("clip.exe", stdin=data)
 
+        elif which("kitten"):
+            yield call("kitten", "clipboard", stdin=data)
+
         elif local:
 
             def c2() -> int:
