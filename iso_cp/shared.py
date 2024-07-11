@@ -1,4 +1,5 @@
-from asyncio import get_event_loop
+from asyncio import IncompleteReadError, LimitOverrunError, get_event_loop
+from asyncio.streams import StreamReader
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import suppress
 from functools import partial
@@ -9,7 +10,7 @@ from signal import Signals
 from tempfile import NamedTemporaryFile
 from typing import Any, Callable, Iterable, Optional, TypeVar
 
-from iso_cp.consts import TMP
+from iso_cp.consts import TMP, NUL
 
 _T = TypeVar("_T")
 
@@ -37,6 +38,23 @@ async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:
         with suppress(ProcessLookupError):
             kill_children(proc.pid)
         await proc.wait()
+
+
+async def read_all(reader: StreamReader) -> bytes:
+    acc = bytearray()
+    while True:
+        try:
+            b = await reader.readuntil(NUL)
+        except IncompleteReadError:
+            break
+        except LimitOverrunError as e:
+            c = await reader.readexactly(e.consumed)
+            acc.extend(c)
+        else:
+            acc.extend(b)
+            break
+
+    return acc
 
 
 async def run_in_executor(f: Callable[..., _T], *args: Any, **kwargs: Any) -> _T:

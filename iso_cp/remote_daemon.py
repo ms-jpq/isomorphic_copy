@@ -3,13 +3,13 @@ from asyncio import StreamReader, StreamWriter, start_unix_server
 from os.path import normcase
 from sys import stdout
 
-from iso_cp.consts import LIMIT, NUL, SOCKET_PATH
-from iso_cp.shared import run_in_executor
+from iso_cp.consts import SOCKET_PATH
+from iso_cp.shared import read_all, run_in_executor
 
 
 async def r_daemon() -> int:
     async def handler(reader: StreamReader, _: StreamWriter) -> None:
-        data = await reader.readuntil(NUL)
+        data = await read_all(reader)
 
         def cont() -> None:
             stdout.buffer.write(data)
@@ -17,7 +17,7 @@ async def r_daemon() -> int:
 
         await run_in_executor(cont)
 
-    server = await start_unix_server(handler, normcase(SOCKET_PATH), limit=LIMIT)
+    server = await start_unix_server(handler, normcase(SOCKET_PATH))
 
     if sys.version_info > (3, 7):
         async with server:

@@ -1,7 +1,6 @@
 from pathlib import Path
 
 NUL = b"\0"
-LIMIT = 2**32
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
 TITLE = "ISO-CP"

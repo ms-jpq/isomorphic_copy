@@ -1,12 +1,4 @@
-from asyncio import (
-    FIRST_COMPLETED,
-    IncompleteReadError,
-    LimitOverrunError,
-    ensure_future,
-    sleep,
-    wait,
-)
-from asyncio.streams import StreamReader
+from asyncio import FIRST_COMPLETED, ensure_future, sleep, wait
 from asyncio.subprocess import DEVNULL, PIPE, create_subprocess_exec
 from contextlib import contextmanager, suppress
 from datetime import datetime
@@ -18,10 +10,10 @@ from sys import stderr
 from textwrap import dedent
 from typing import Iterator, Sequence
 
-from iso_cp.consts import BIN, INT_EXIT, LIMIT, NUL, TIME_FMT, TITLE, TOP_LV
+from iso_cp.consts import BIN, INT_EXIT, TIME_FMT, TITLE, TOP_LV
 from iso_cp.copy import copy
 from iso_cp.logging import log
-from iso_cp.shared import join, kill_children
+from iso_cp.shared import join, kill_children, read_all
 
 
 def _tunneling_prog() -> str:
@@ -70,27 +62,10 @@ def _tunnel_cmd(name: str, args: Sequence[str]) -> Sequence[str]:
         assert False
 
 
-async def _p_data(stdout: StreamReader) -> bytes:
-    acc = bytearray()
-    while True:
-        try:
-            b = await stdout.readuntil(NUL)
-        except IncompleteReadError:
-            break
-        except LimitOverrunError as e:
-            c = await stdout.readexactly(e.consumed)
-            acc.extend(c)
-        else:
-            acc.extend(b)
-            break
-
-    return acc
-
-
 async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     cmds = _tunnel_cmd(name, args=args)
     proc = await create_subprocess_exec(
-        *cmds, start_new_session=True, stdin=DEVNULL, stdout=PIPE, limit=LIMIT
+        *cmds, start_new_session=True, stdin=DEVNULL, stdout=PIPE
     )
     p_done = ensure_future(proc.wait())
     time = datetime.now().strftime(TIME_FMT)
@@ -104,7 +79,7 @@ async def _daemon(local: bool, name: str, args: Sequence[str]) -> int:
     assert proc.stdout
     try:
         while True:
-            p_data = ensure_future(_p_data(proc.stdout))
+            p_data = ensure_future(read_all(proc.stdout))
             await wait((p_done, p_data), return_when=FIRST_COMPLETED)
 
             if p_data.done():
