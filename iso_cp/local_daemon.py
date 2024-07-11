@@ -18,7 +18,7 @@ from sys import stderr
 from textwrap import dedent
 from typing import Iterator, Sequence
 
-from iso_cp.consts import BIN, LIMIT, NUL, TIME_FMT, TITLE, TOP_LV
+from iso_cp.consts import BIN, INT_EXIT, LIMIT, NUL, TIME_FMT, TITLE, TOP_LV
 from iso_cp.copy import copy
 from iso_cp.logging import log
 from iso_cp.shared import join, kill_children
@@ -150,8 +150,8 @@ async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
         while True:
             code = await _daemon(local, name=name, args=args)
             log.warn("%s", f"Exited - $? {code}")
-            if code == 130:
-                return 130
+            if code == INT_EXIT:
+                return INT_EXIT
             else:
                 # await run_in_executor(_bell)
                 await sleep(1)

@@ -4,6 +4,7 @@ from sys import exit
 from typing import Awaitable, TypeVar
 
 from iso_cp.main import main
+from iso_cp.consts import INT_EXIT
 
 T = TypeVar("T")
 
@@ -25,6 +26,6 @@ else:
 try:
     code = run(main())
 except KeyboardInterrupt:
-    exit(130)
+    exit(INT_EXIT)
 else:
     exit(code)

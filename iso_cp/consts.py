@@ -16,3 +16,4 @@ SOCKET_PATH = TMP / "cp.socket"
 WRITE_PATH = TMP / "clipboard.txt"
 
 R_UID_PATH = TMP / "r_uid"
+INT_EXIT = 130
