@@ -5,7 +5,7 @@ from functools import partial
 from os import getpgid, killpg
 from pathlib import Path
 from shlex import quote
-from signal import SIGKILL
+from signal import Signals
 from tempfile import NamedTemporaryFile
 from typing import Any, Callable, Iterable, Optional, TypeVar
 
@@ -19,7 +19,7 @@ def join(cmds: Iterable[str]) -> str:
 
 
 def kill_children(pid: int) -> None:
-    killpg(getpgid(pid), SIGKILL)
+    killpg(getpgid(pid), Signals.SIGKILL)
 
 
 async def call(prog: str, *args: str, stdin: Optional[bytes] = None) -> int:

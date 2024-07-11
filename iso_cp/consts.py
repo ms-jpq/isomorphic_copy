@@ -15,5 +15,4 @@ EXEC = TMP / "python"
 SOCKET_PATH = TMP / "cp.socket"
 WRITE_PATH = TMP / "clipboard.txt"
 
-L_UID_PATH = TMP / "l_uid"
 R_UID_PATH = TMP / "r_uid"

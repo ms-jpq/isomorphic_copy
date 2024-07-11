@@ -150,5 +150,8 @@ async def l_daemon(local: bool, name: str, args: Sequence[str]) -> int:
         while True:
             code = await _daemon(local, name=name, args=args)
             log.warn("%s", f"Exited - $? {code}")
-            # await run_in_executor(_bell)
-            await sleep(1)
+            if code == 130:
+                return 130
+            else:
+                # await run_in_executor(_bell)
+                await sleep(1)

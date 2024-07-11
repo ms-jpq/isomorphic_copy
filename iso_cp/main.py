@@ -5,12 +5,12 @@ from os import environ, getpid, getppid, kill, pathsep, readlink
 from os.path import normpath
 from pathlib import Path, PurePath
 from platform import system
-from signal import SIGTERM
+from signal import Signals
 from sys import executable, stdin
 from typing import Any, Awaitable, Optional, Sequence, Tuple
 from uuid import uuid4
 
-from iso_cp.consts import BIN, EXEC, L_UID_PATH, R_UID_PATH
+from iso_cp.consts import BIN, EXEC, R_UID_PATH
 from iso_cp.copy import copy
 from iso_cp.local_daemon import l_daemon
 from iso_cp.logging import log_exc
@@ -19,8 +19,8 @@ from iso_cp.remote_daemon import r_daemon
 from iso_cp.shared import run_in_executor, safe_write
 
 
-def _suicide() -> None:
-    kill(getpid(), SIGTERM)
+def _suicide(sig: Signals) -> None:
+    kill(getpid(), sig)
 
 
 async def _s1() -> None:
@@ -28,7 +28,7 @@ async def _s1() -> None:
     while True:
         cppid = getppid()
         if cppid == 1 or cppid != ppid:
-            _suicide()
+            _suicide(Signals.SIGTERM)
         else:
             await sleep(1)
 
@@ -50,7 +50,7 @@ async def _s2(path: Path) -> None:
     while True:
         b = await run_in_executor(c2)
         if b != b4:
-            _suicide()
+            _suicide(Signals.SIGINT)
         await sleep(1)
 
 
@@ -145,8 +145,7 @@ async def main() -> int:
 
     async with _Suicide(_s1()):
         if name in {"cssh", "cdocker"}:
-            async with _Suicide(_s2(L_UID_PATH)):
-                return await l_daemon(local, name=name, args=args)
+            return await l_daemon(local, name=name, args=args)
         elif name == "csshd":
             async with _Suicide(_s2(R_UID_PATH)):
                 return await r_daemon()
