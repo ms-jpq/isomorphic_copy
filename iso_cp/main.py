@@ -146,7 +146,7 @@ async def main() -> int:
     async with _Suicide(_s1()):
         if name in {"cssh", "cdocker"}:
             return await l_daemon(local, name=name, args=args)
-        elif name == "csshd":
+        elif name == "cd":
             async with _Suicide(_s2(R_UID_PATH)):
                 return await r_daemon()
         elif _is_paste(name, args=args):

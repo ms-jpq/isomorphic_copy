@@ -18,7 +18,7 @@ from iso_cp.shared import join, kill_children, read_all
 
 def _tunneling_prog() -> str:
     home = Path.home()
-    canonical = BIN / "csshd"
+    canonical = BIN / "cd"
     rel = canonical.relative_to(TOP_LV.parent)
     eh = f'exec "$HOME"{sep}'
 
