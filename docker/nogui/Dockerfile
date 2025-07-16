@@ -1,7 +1,4 @@
-ARG PYTHON_VER="3.6.10"
-
-FROM python:${PYTHON_VER}
-
+FROM ubuntu:focal
 
 # Requirements
 ENTRYPOINT ["bash"]
